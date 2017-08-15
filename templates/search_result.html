@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}Test Search Results{% endblock%}</title>
+</head>
+
+{% block content %}
+<div> 
+    <h1>NEW Search results:</h1> 
+    <ul>
+        {% for result in results %}
+        <li>
+            {{ result[1] }}
+        </li>
+      {% endfor %}
+    </ul>
+</div>
+  <form>
+    <button>Prev</button>
+    <button>Next</button>
+  </form>  
+{% endblock %}

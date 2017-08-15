@@ -169,9 +169,9 @@ class Roster(db.Model):
     __tablename__ = "rosters"
 
     # create the db columns.
-    roster_code = db.Column(db.String(48),
-                            primary_key=True,
-                            nullable=False)
+    roster_id = db.Column(db.Integer,
+                          primary_key=True,
+                          autoincrement=True)
     perf_group_code = db.Column(db.String(48),
                                 db.ForeignKey('performance_groups.perf_group_code'),
                                 nullable=False)
@@ -191,7 +191,7 @@ class Roster(db.Model):
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return "<Roster code=%s name=%s>" % (self.roster_code, self.name)
+        return "<Roster id=%d name=%s>" % (self.roster_id, self.name)
 
 
 class Provider(db.Model):
@@ -202,8 +202,7 @@ class Provider(db.Model):
     # create the db columns.
     provider_id = db.Column(db.Integer,
                             primary_key=True,
-                            autoincrement=True,
-                            nullable=False)
+                            autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
 
     # define repr function to print some useful info re:db objects.
@@ -220,23 +219,36 @@ class Piece(db.Model):
     # create the db columns.
     piece_id = db.Column(db.Integer,
                          primary_key=True,
-                         autoincrement=True,
-                         nullable=False)
+                         autoincrement=True)
     # ASK = OK for this FK to be nullable? (piece not yet owned/borrowed...)
     owner_id = db.Column(db.Integer,
                          db.ForeignKey('owners.owner_id'))
     provider_id = db.Column(db.Integer,
                             db.ForeignKey('providers.provider_id'),
                             nullable=False)
-    name = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     # page_id = this is from CPDL API, they have "page id" that is useful!
     page_id = db.Column(db.Integer)
     music_url = db.Column(db.String(150))
-    midi_url = db.Column(db.String(150))
-    # ??????????????
-    # Do I put metadata into a billion fields, like Composer, year, voicing, etc?
-    # Or, can I store in the JSONB & just pull as needed??)
-    # EG: license_type = db.Column(db.String(40))
+    midi_url = db.Column(db.String(150))    # ??? NEEDS MIDI TABLE FOR MANY PARTS?
+    genre = (db.String(248))             # ??? NEEDS GENRE TABLE?
+    composer = db.Column(db.String(248), nullable=False)
+    lyricist = db.Column(db.String(248))
+    arranger = db.Column(db.String(248))
+    publication_year = db.Column(db.String(48))
+    original_language = db.Column(db.String(48))
+    voicing = db.Column(db.String(248))
+    instrumentation = db.Column(db.String(248))
+    key = db.Column(db.String(48))
+    time_signature = (db.String(48))
+    tempo = db.Column(db.String(128))
+    text_original = db.Column(db.String(2048))
+    text_english = db.Column(db.String(2048))
+    score_type = db.Column(db.String(248))
+    license_type = db.Column(db.String(40))
+    num_lic_owned = db.Column(db.Integer)
+    description = (db.String(2048))
+    # price_per = db.Column(db.???) ?????????Add this later, maybe - type?
 
     # Define a relationship w/Owner class via owner_id foreign key.
     owner = db.relationship('Owner', backref='pieces')
@@ -247,7 +259,9 @@ class Piece(db.Model):
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return "<Piece piece_id=%d name=%s>" % (self.piece_id, self.name)
+        return "<Piece piece_id=%d title=%s composer=%s>" % (self.piece_id,
+                                                             self.title, 
+                                                             self.composer)
 
 
 class Assignment(db.Model):
@@ -258,26 +272,25 @@ class Assignment(db.Model):
     # create the db columns.
     assignment_id = db.Column(db.Integer,
                               primary_key=True,
-                              autoincrement=True,
-                              nullable=False)
+                              autoincrement=True)
     piece_id = db.Column(db.Integer,
                          db.ForeignKey('pieces.piece_id'),
                          nullable=False)
-    roster_code = db.Column(db.String(48),
-                            db.ForeignKey('rosters.roster_code'),
-                            nullable=False)
+    roster_id = db.Column(db.Integer,
+                          db.ForeignKey('rosters.roster_id'),
+                          nullable=False)
     pi_id = db.Column(db.Integer,
                       db.ForeignKey('performer_instruments.pi_id'))
 
     # Define a relationship w/Piece class via piece_id foreign key.
     piece = db.relationship('Piece', backref='assignments')
 
-    # Define a relationship w/Roster class via roster_code foreign key.
+    # Define a relationship w/Roster class via roster_id foreign key.
     roster = db.relationship('Roster', backref='assignments')
 
     # Define a relationship w/PerformerInstument class via pi_id foreign key.
     performer_instrument = db.relationship('PerformerInstument',
-                                            backref='assignments')
+                                           backref='assignments')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -294,8 +307,7 @@ class Setlist(db.Model):
     # create the db columns.
     setlist_id = db.Column(db.Integer,
                            primary_key=True,
-                           autoincrement=True,
-                           nullable=False)
+                           autoincrement=True)
     name = db.Column(db.String(64))
     notes = db.Column(db.String(200))
 
@@ -313,8 +325,7 @@ class AssignedSet(db.Model):
     # create the db columns.
     as_id = db.Column(db.Integer,
                       primary_key=True,
-                      autoincrement=True,
-                      nullable=False)
+                      autoincrement=True)
     assignment_id = db.Column(db.Integer,
                               db.ForeignKey('assignments.assignment_id'),
                               nullable=False)
@@ -322,10 +333,10 @@ class AssignedSet(db.Model):
                            db.ForeignKey('setlists.setlist_id'),
                            nullable=False)
 
-    # Define a relationship w/Piece class via piece_id foreign key.
+    # Define a relationship w/Assignment class via assignment_id foreign key.
     assignment = db.relationship('Assignment', backref='assigned_sets')
 
-    # Define a relationship w/Roster class via roster_code foreign key.
+    # Define a relationship w/Setlist class via setlist_id foreign key.
     setlist = db.relationship('Setlist', backref='assigned_sets')
 
     # define repr function to print some useful info re:db objects.
@@ -393,14 +404,14 @@ class Event(db.Model):
 # Helper functions
 
 def init_app():
-    # So that we can use Flask-SQLAlchemy, we'll make a Flask app.
+#     # So that we can use Flask-SQLAlchemy, we'll make a Flask app.
     from flask import Flask
     app = Flask(__name__)
 
     connect_to_db(app)
     print "Connected to DB."
 
-
+# Configure to use our PostgreSQL database.
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
@@ -421,7 +432,10 @@ if __name__ == "__main__":
 
     app = Flask(__name__)
 
+    # from server import app
+
     connect_to_db(app)
     print "Connected to DB."
 
+    # create db from this model.
     db.create_all()
