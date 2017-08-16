@@ -39,12 +39,12 @@ def register_process():
     """Process registration."""
 
     # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-    fname = request.form["fname"]
-    lname = request.form["lname"]
-    title = request.form["title"]
-    phone = request.form["phone"]
+    email = request.form.get("email")
+    password = request.form.get("password")
+    fname = request.form.get("fname")
+    lname = request.form.get("lname")
+    title = request.form.get("title")
+    phone = request.form.get("phone")
 
     user = User.query.filter_by(email=email).first()
 

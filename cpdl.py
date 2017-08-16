@@ -51,3 +51,8 @@ r4 = requests.get(
     'http://www.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
     params=payload,
 )     
+
+# Test = searching by CPDL #, in CPDL - this was URL for # 28188:
+# http://www2.cpdl.org/wiki/index.php?search=cpdl+%2328188&title=Special%3ASearch&go=Go
+# And for # 21767:
+# http://www2.cpdl.org/wiki/index.php?search=cpdl+%2321767&title=Special%3ASearch&go=Go

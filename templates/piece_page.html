@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}In Concert{% endblock%}</title>
+</head>
+
+{% block content %}
+  <div id="homepage-block">
+      <h1 id="homepage-title">In Concert</h1>
+      <h2>Your comprehensive music library and concert planning tool.</h2>
+  </div>
+    <form action="search" method="GET">
+      <div class="form-group">
+        <label>
+          Search
+          <input type="text" name="search" class="formfield" required>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Search" class="btn btn-danger">
+      </div>
+    </form>
+{% endblock %}

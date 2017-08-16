@@ -10,13 +10,15 @@
     <ul>
         {% for result in results %}
         <li>
-            {{ result[1] }}
+            <a href="/page_search?page_id={{ result[0] }}">{{ result[1] }}</a>
         </li>
       {% endfor %}
     </ul>
 </div>
-  <form>
-    <button>Prev</button>
-    <button>Next</button>
-  </form>  
+  {% if results|length > 49 %}
+    <form>
+      <button>Prev</button>
+      <button>Next</button>
+    </form>
+  {% endif %}
 {% endblock %}

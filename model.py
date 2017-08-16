@@ -229,6 +229,7 @@ class Piece(db.Model):
     title = db.Column(db.String(150), nullable=False)
     # page_id = this is from CPDL API, they have "page id" that is useful!
     page_id = db.Column(db.Integer)
+    cpdl_num = db.Column(db.String(5))
     music_url = db.Column(db.String(150))
     midi_url = db.Column(db.String(150))    # ??? NEEDS MIDI TABLE FOR MANY PARTS?
     genre = (db.String(248))             # ??? NEEDS GENRE TABLE?
