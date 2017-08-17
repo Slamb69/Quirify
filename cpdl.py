@@ -14,14 +14,14 @@ payload = {'gsrsearch': 'Ecco Gesualdo'}
 
 # making the request
 r1 = requests.get(
-    'http://www.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search',
+    'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search',
     params=payload
 )
 
 
 # parsing a full page, specifying the id of the page to parse
 r2 = requests.get(
-    'http://www.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
+    'http://www1.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
 )
 
 
@@ -32,7 +32,7 @@ payload = {
 }
 
 r3 = requests.get(
-    'http://www.cpdl.org/wiki/api.php?action=parse&format=json',
+    'http://www1.cpdl.org/wiki/api.php?action=parse&format=json',
     params=payload,
 )
 
@@ -48,9 +48,9 @@ payload = {
 }
 
 r4 = requests.get(
-    'http://www.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
+    'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
     params=payload,
-)     
+) 
 
 # Test = searching by CPDL #, in CPDL - this was URL for # 28188:
 # http://www2.cpdl.org/wiki/index.php?search=cpdl+%2328188&title=Special%3ASearch&go=Go

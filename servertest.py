@@ -43,9 +43,9 @@ def search_cpdl():
 
     payload = {'gsrsearch': value}
 
-    # cpdl_search = 'http://www.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search'
+    # cpdl_search = 'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search'
 
-    r1 = requests.get('http://www.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search&gsrlimit=max', params=payload)
+    r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search&gsrlimit=max', params=payload)
 
     results = r1.json()
 
@@ -64,13 +64,13 @@ def search_cpdl_page():
 
     payload = {'pageid': value}
 
-    # cpdl_search = 'http://www.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
+    # cpdl_search = 'http://www1.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
 
-    r1 = requests.get('http://www.cpdl.org/wiki/api.php?action=parse&format=json', params=payload)
+    r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=parse&format=json', params=payload)
 
     results = r1.json()
 
-    # return results
+    return parse_page_results(results)
 
     # results = parse_search_results(results)
 
@@ -78,12 +78,12 @@ def search_cpdl_page():
 
     # return render_template("piece_page.html", results=results)
 
-# HELPER FUNCTIONS:**************************
+# ****** HELPER FUNCTIONS: **************************
 
 
 def parse_search_results(results):
     """Converts search results page id and title data into a dictionary and
-       returns it's items as a list of tuples."""
+       returns its items as a list of tuples."""
 
     pages = results['query']['pages']
 
@@ -99,32 +99,43 @@ def parse_search_results(results):
 def parse_page_results(results):
     """Returns each page's results."""
 
-    # Get all the image files from the page.
-    # images = results['parse']['images']
+    # Get all the image files from the page, and cut out the first 2 items, we
+    # then have all of the sheet music and audio files.
+    images = results['parse']['images']
+    images = images[2:]
 
-    # Get a list of all of the sheet music files (.pdfs)
-
-    # sht_music = filter(lambda x: ('.pdf' in x), images)
-
-    # # Get a list of all of the midi files (.mid)
-
-    # midi_file = 
-
-
+    # Pull data from the page's html - first, get the page "text" from the json.
     page_txt = results['parse']['text']['*']
 
-    # Make beautiful soup from page 'text''s html
+    # Make beautiful soup from page text's html
     soup = BeautifulSoup(page_txt, "lxml")
 
     # Get CPDL numbers for each piece's sheet music / midi
     cpdl_nums = map(lambda x: x.string, soup('font'))
 
+    # Get each piece of sheet music (.pdf) and audio files for each "user/editor"
+    # Associate CPDL # for each file, w/dictionary of file ext/filename values
+    pieces_by_cpdl = []
+
+    # OOPS - some pages have no PDF, links to a WEB PAGE...don't really want to
+    # offer files on these, just show piece data??? Hmm...decide!
+    if images != []:
+        pieces_dict = {'pdf': get_file_urls(images[0])}
+
+        for image in images[1:]:
+            if image.split('.')[-1] == 'pdf':
+                pieces_by_cpdl.append(pieces_dict)
+                pieces_dict = {'pdf': get_file_urls(image)}
+            else:
+                pieces_dict[str(image.split('.')[-1])] = get_file_urls(image)
+        pieces_by_cpdl.append(pieces_dict)
+    else:
+        pass
     # One way to get the text titles for the text/translations:
     text_titles = map(lambda x: list(x[0].descendants)[1],
                       filter(lambda x: x, map(lambda x: x('big'), soup('b'))))
 
-    texts = 
-
+    return "Pieces-cpdl:" + str(pieces_by_cpdl) + "           CPDL #s:" + str(cpdl_nums)
     # data = {}
 
     # for page_id, page in pages.items():
@@ -132,6 +143,45 @@ def parse_page_results(results):
     #     data[page_id] = title
 
     # return data.items()
+
+
+def get_file_urls(images):
+    """Iterate over list of images and get the urls for each one in the list."""
+
+    # url_list = []
+
+    # for image in images:
+    #     payload = {
+    #         'titles': 'File:' + image,
+    #         'iiprop': 'url',
+    #     }
+
+    #     r4 = requests.get(
+    #         'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
+    #         params=payload,
+    #     )
+
+    #     # Get the URL
+    #     url = r4.json()['query']['pages'].values()[0]['imageinfo'][0]['url']
+
+    #     url_list.append(url)
+
+    # return url_list
+
+    payload = {
+        'titles': 'File:' + images,
+        'iiprop': 'url',
+    }
+
+    r4 = requests.get(
+        'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
+        params=payload,
+    )
+
+    # Get the URL
+    url = r4.json()['query']['pages'].values()[0]['imageinfo'][0]['url']
+
+    return url
 
 
 if __name__ == "__main__":
