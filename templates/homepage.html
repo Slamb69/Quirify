@@ -5,20 +5,32 @@
 </head>
 
 {% block content %}
+
   <div id="homepage-block">
-      <h1 id="homepage-title">In Concert</h1>
+    <h1 id="homepage-title">In Concert</h1>
       <h2>Your comprehensive music library and concert planning tool.</h2>
+
+{% if not "user_id" in session %}
+        <p>Some very informative stuff about this AMAZING app, and why you
+          really should <a href="/register"> register today!</a></p>
+{% endif %}
+
+{% if "user_id" in session %}
   </div>
     <form action="search" method="GET">
       <div class="form-group">
         <label>
-          Search
-          <input type="text" name="search" class="formfield" required>
+          Search for a piece by name, composer, or key word.
         </label>
+
+        <br\>
+        <input type="text" name="search" class="formfield" required>
       </div>
 
       <div class="form-group">
-        <input type="submit" value="Search" class="btn btn-danger">
+        <br\><input type="submit" value="Search" class="btn btn-danger">
       </div>
     </form>
+{% endif %}
+
 {% endblock %}

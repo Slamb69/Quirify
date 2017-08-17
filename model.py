@@ -47,16 +47,16 @@ class PerformanceGroup(db.Model):
     perf_group_code = db.Column(db.String(48),
                                 primary_key=True,
                                 nullable=False)
-    user_id = db.Column(db.Integer,
-                        db.ForeignKey('users.user_id'),
-                        nullable=False)
+    # user_id = db.Column(db.Integer,
+    #                     db.ForeignKey('users.user_id'),
+    #                     nullable=False)
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(2048))
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date)
 
-    # Define a relationship w/User class via user_id foreign key.
-    user = db.relationship('User', backref='perf_groups')
+    # # Define a relationship w/User class via user_id foreign key.
+    # user = db.relationship('User', backref='perf_groups')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -144,11 +144,9 @@ class PerformerInstrument(db.Model):
                       autoincrement=True,
                       nullable=False)
     performer_id = db.Column(db.Integer,
-                             db.ForeignKey('performers.performer_id'),
-                             nullable=False)
+                             db.ForeignKey('performers.performer_id'))
     instrument_code = db.Column(db.String(48),
-                                db.ForeignKey('instruments.instrument_code'),
-                                nullable=False)
+                                db.ForeignKey('instruments.instrument_code'))
 
     # Define a relationship w/Performer class via performer_id foreign key.
     performer = db.relationship('Performer', backref='performer_instruments')
@@ -211,6 +209,20 @@ class Provider(db.Model):
         return "<Provider id=%d name=%s>" % (self.provider_id, self.name)
 
 
+class SoundFiles(db.Model):
+    """Holds any midi or other sound files for the piece."""
+        # create the db columns.
+    file_id = db.Column(db.Integer,
+                        primary_key=True,
+                        autoincrement=True)
+    piece_id = db.Column(db.Integer,
+                         db.ForeignKey('pieces.piece_id'),
+                         nullable=False)
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    piece = db.relationship('Piece', backref='sound_files')
+
+
 class Piece(db.Model):
     """Piece model, for each piece (sheet music)."""
 
@@ -231,7 +243,6 @@ class Piece(db.Model):
     page_id = db.Column(db.Integer)
     cpdl_num = db.Column(db.String(5))
     music_url = db.Column(db.String(150))
-    midi_url = db.Column(db.String(150))    # ??? NEEDS MIDI TABLE FOR MANY PARTS?
     genre = (db.String(248))             # ??? NEEDS GENRE TABLE?
     composer = db.Column(db.String(248), nullable=False)
     lyricist = db.Column(db.String(248))
@@ -261,7 +272,7 @@ class Piece(db.Model):
     def __repr__(self):
         """Print more useful info."""
         return "<Piece piece_id=%d title=%s composer=%s>" % (self.piece_id,
-                                                             self.title, 
+                                                             self.title,
                                                              self.composer)
 
 
@@ -290,7 +301,7 @@ class Assignment(db.Model):
     roster = db.relationship('Roster', backref='assignments')
 
     # Define a relationship w/PerformerInstument class via pi_id foreign key.
-    performer_instrument = db.relationship('PerformerInstument',
+    performer_instrument = db.relationship('PerformerInstrument',
                                            backref='assignments')
 
     # define repr function to print some useful info re:db objects.
@@ -354,10 +365,15 @@ class Concert(db.Model):
     # create the db columns.
     concert_id = db.Column(db.Integer,
                            primary_key=True,
-                           autoincrement=True,
-                           nullable=False)
+                           autoincrement=True)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False)
     name = db.Column(db.String(64))
     description = db.Column(db.String(2048))
+
+    # Define a relationship w/User class via user_id foreign key.
+    user = db.relationship('User', backref='concerts')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):

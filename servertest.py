@@ -114,28 +114,34 @@ def parse_page_results(results):
     cpdl_nums = map(lambda x: x.string, soup('font'))
 
     # Get each piece of sheet music (.pdf) and audio files for each "user/editor"
-    # Associate CPDL # for each file, w/dictionary of file ext/filename values
-    pieces_by_cpdl = []
+    # and save as a dict of files by each
+    pieces_dict_list = []
 
     # OOPS - some pages have no PDF, links to a WEB PAGE...don't really want to
     # offer files on these, just show piece data??? Hmm...decide!
     if images != []:
-        pieces_dict = {'pdf': get_file_urls(images[0])}
+        pieces_dict = {'pdf': get_file_url(images[0])}
 
         for image in images[1:]:
             if image.split('.')[-1] == 'pdf':
-                pieces_by_cpdl.append(pieces_dict)
-                pieces_dict = {'pdf': get_file_urls(image)}
+                pieces_dict_list.append(pieces_dict)
+                pieces_dict = {'pdf': get_file_url(image)}
             else:
-                pieces_dict[str(image.split('.')[-1])] = get_file_urls(image)
-        pieces_by_cpdl.append(pieces_dict)
+                pieces_dict[str(image.split('.')[-1])] = get_file_url(image)
+        pieces_dict_list.append(pieces_dict)
     else:
         pass
+
+    # Using unique cpdl numbers as the key, join up the above files data as the
+    # value, using zip.
+    pieces_by_cpdl = {cpdl: piece for cpdl, piece in zip(cpdl_nums,
+                                                         pieces_dict_list)}
+
     # One way to get the text titles for the text/translations:
     text_titles = map(lambda x: list(x[0].descendants)[1],
                       filter(lambda x: x, map(lambda x: x('big'), soup('b'))))
 
-    return "Pieces-cpdl:" + str(pieces_by_cpdl) + "           CPDL #s:" + str(cpdl_nums)
+    return "Pieces by cpdl:" + str(pieces_by_cpdl)
     # data = {}
 
     # for page_id, page in pages.items():
@@ -145,40 +151,20 @@ def parse_page_results(results):
     # return data.items()
 
 
-def get_file_urls(images):
-    """Iterate over list of images and get the urls for each one in the list."""
-
-    # url_list = []
-
-    # for image in images:
-    #     payload = {
-    #         'titles': 'File:' + image,
-    #         'iiprop': 'url',
-    #     }
-
-    #     r4 = requests.get(
-    #         'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
-    #         params=payload,
-    #     )
-
-    #     # Get the URL
-    #     url = r4.json()['query']['pages'].values()[0]['imageinfo'][0]['url']
-
-    #     url_list.append(url)
-
-    # return url_list
-
+def get_file_url(image):
+    """Takes an image name, sends request to cpdl, and returns the image's url."""
+    # Puts the image into the payload.
     payload = {
-        'titles': 'File:' + images,
+        'titles': 'File:' + image,
         'iiprop': 'url',
     }
-
+    # Sends request to cpdl.org & captures the request's results as r4.
     r4 = requests.get(
         'http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=imageinfo',
         params=payload,
     )
 
-    # Get the URL
+    # Gets the url data from the results json and saves it as 'url'.
     url = r4.json()['query']['pages'].values()[0]['imageinfo'][0]['url']
 
     return url

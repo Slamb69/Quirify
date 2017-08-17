@@ -9,6 +9,13 @@ from flask_debugtoolbar import DebugToolbarExtension
 from model import (connect_to_db, db, User, Provider, Piece, Owner,
                    PerformanceGroup, Concert)
 
+import requests
+# To get text from CPDL pages, need Beautiful Soup!!
+from bs4 import BeautifulSoup
+# For Beautiful Soup, need lxml's html
+from lxml import html
+# For Beautiful Soup, need regex
+import re
 
 app = Flask(__name__)
 
@@ -18,6 +25,7 @@ app.secret_key = "ABC"
 # Normally, if you use an undefined variable in Jinja2, it fails silently.
 # This is horrible. Fix this so that, instead, it raises an error.
 app.jinja_env.undefined = StrictUndefined
+app.jinja_env.auto_reload = True
 
 
 @app.route('/')
@@ -50,7 +58,7 @@ def register_process():
 
     if user:
         flash("User already exists, please log in.")
-        return redirect("/login")
+        return redirect("/register")  # NOTE = currently reg/login on SAME page
     else:
         user = User(email=email,
                     password=password,
@@ -62,15 +70,17 @@ def register_process():
         db.session.add(user)
         db.session.commit()
 
+        session["user_id"] = user.user_id
+
         flash("User %s added." % email)
         return redirect("/users/%s" % user.user_id)
 
 
-@app.route('/login', methods=['GET'])
-def login_form():
-    """Show login form."""
+# @app.route('/login', methods=['GET'])   # NOTE = currently reg/login on SAME page
+# def login_form():
+#     """Show login form."""
 
-    return render_template("login_form.html")
+#     return render_template("login_form.html")
 
 
 @app.route('/login', methods=['POST'])
@@ -85,11 +95,11 @@ def login_process():
 
     if not user:
         flash("No such user - please correct the email, or register.")
-        return redirect("/login")
+        return redirect("/register") # NOTE = currently reg/login on SAME page
 
     if user.password != password:
         flash("Incorrect password.")
-        return redirect("/login")
+        return redirect("/register") # NOTE = currently reg/login on SAME page
 
     session["user_id"] = user.user_id
 
@@ -106,32 +116,40 @@ def logout():
     return redirect("/")
 
 
-# @app.route("/search", methods=["POST"])
-# def search_pieces():
-#     """Search for pieces."""
+@app.route("/search")
+def search_cpdl():
+    """Search CPDL.org choralwiki for pieces (by composer, name, etc)."""
 
-#     payload = request.form.get["search"]
-#     return render_template("results_list.html", results=results)
+    value = request.args.get("search")
+
+    payload = {'gsrsearch': value}
+
+    r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search&gsrlimit=max', params=payload)
+
+    results = r1.json()
+
+    results = parse_search_results(results)
+
+    results.sort(key=lambda x: x[1])
+
+    return render_template("search_result.html", results=results)
 
 
-# @app.route("/users/<int:user_id>")
-# def user_detail(user_id):
-#     """Show info about user."""
+@app.route("/users/<int:user_id>")
+def user_detail(user_id):
+    """Show info about user."""
 
-#     user = (User.query.options(db.joinedload('pieces')
-#             .joinedload('performance_groups').get(user_id))
+    user = User.query.get(user_id)
 
-#     return render_template("user.html",
-#                             user=user,
-#                             groups=user.perf_groups)
+    return render_template("user.html", user=user)
 
 
-@app.route("/pieces_list")
-def pieces_list():
-    """Show list of pieces."""
+# @app.route("/pieces_list")
+# def pieces_list():
+#     """Show list of pieces."""
 
-    pieces = Piece.query.order_by('title').all()
-    return render_template("pieces_list.html", pieces=pieces)
+#     pieces = Piece.query.order_by('title').all()
+#     return render_template("pieces_list.html", pieces=pieces)
 
 
 # @app.route("/pieces/<int:piece_id>", methods=['GET'])
@@ -176,6 +194,23 @@ def pieces_list():
 #     db.session.commit()
 
 #     return redirect("/movies/%s" % movie_id)
+
+# ****** HELPER FUNCTIONS: **************************
+
+
+def parse_search_results(results):
+    """Converts search results page id and title data into a dictionary and
+       returns its items as a list of tuples."""
+
+    pages = results['query']['pages']
+
+    data = {}
+
+    for page_id, page in pages.items():
+        title = page['title']
+        data[page_id] = title
+
+    return data.items()
 
 
 if __name__ == "__main__":

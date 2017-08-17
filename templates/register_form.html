@@ -6,7 +6,7 @@
 
 {% block content %}
 <div id="registration">
-<h1 class="title" id="reg-title">Register</h1>  
+<h1 class="title" id="reg-title">New user? Register here:</h1>  
     <form action="register" method="POST" id="regform" name="regform">
       <div class="form-group">
           <label>
@@ -52,6 +52,31 @@
 
       <div class="form-group">
           <input type="submit" value="Register" class="btn btn-danger">
+      </div>
+    </form>
+    <p>* Required field</p>
+</div>  
+<br\>
+<br\>
+<div id="login">
+<h1 class="title" id="login-title">Already have an account? Log in here:</h1>  
+    <form action="login" method="POST" id="loginform" name="loginform">
+      <div class="form-group">
+          <label>
+              Email*
+              <input type="email" name="email" class="formfield" required>
+          </label>
+      </div>
+
+      <div class="form-group">
+          <label>
+              Password*
+              <input type="password" name="password" class="formfield" required>
+          </label>
+      </div>
+      
+      <div class="form-group">
+          <input type="submit" value="Log me in" class="btn btn-danger">
       </div>
     </form>
     <p>* Required field</p>

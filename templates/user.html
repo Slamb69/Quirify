@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}{{ user.fname }} {{ user.lname }}{% endblock%}</title>
+</head>
+
+{% block content %}
+{% if "user_id" in session %}
+<br>
+<div>
+  <h2>{{ user.fname }} {{ user.lname }}'s Home Page</h2>
+
+  <p>ADDED CONCERT LIST - but only if there ARE concerts!</p><br\>
+  <!-- add button / links to create a new concert -->
+  {% if user.concerts %}
+    <h3>Concerts</h3>
+    <ul>
+    {% for concert in user.concerts %}
+      <li>
+        {{ concert }}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+  <p>ADD PIECES / "My Library (pieces)" list?</p><br\>
+
+  <p>ADD SEARCH / "Find new piece (sheet music)" field / link?</p><br\>
+
+  <p>ADD GROUPS / "My Groups" list + create new button?</p><br\>
+
+  <p>ADD ROSTERS / "My Rosters" list + create new button?</p><br\>
+
+</div>
+{% endif %}
+
+{% endblock %}
