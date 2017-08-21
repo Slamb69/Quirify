@@ -118,10 +118,12 @@ def parse_page_results(results):
     pieces_dict_list = []
 
     # OOPS - some pages have no PDF, links to a WEB PAGE...don't really want to
-    # offer files on these, just show piece data??? Hmm...decide!
+    # offer files on these, just show piece data??? Hmm...decide! For now,
+    # proceeding with what to do if there ARE pdf (sheet music) files.
     if images != []:
         pieces_dict = {'pdf': get_file_url(images[0])}
-
+        # Since all records have the pdf first, then audio files, using pdf to
+        # split list of "images", AKA files!
         for image in images[1:]:
             if image.split('.')[-1] == 'pdf':
                 pieces_dict_list.append(pieces_dict)
@@ -130,10 +132,10 @@ def parse_page_results(results):
                 pieces_dict[str(image.split('.')[-1])] = get_file_url(image)
         pieces_dict_list.append(pieces_dict)
     else:
-        pass
+        pass # ADD HERE = maybe alert/flash that no files + user upload option?
 
-    # Using unique cpdl numbers as the key, join up the above files data as the
-    # value, using zip.
+    # Using unique cpdl numbers as the keys, join up the above files data as the
+    # values, using zip.
     pieces_by_cpdl = {cpdl: piece for cpdl, piece in zip(cpdl_nums,
                                                          pieces_dict_list)}
 
@@ -141,6 +143,8 @@ def parse_page_results(results):
     text_titles = map(lambda x: list(x[0].descendants)[1],
                       filter(lambda x: x, map(lambda x: x('big'), soup('b'))))
 
+    # ****** Not yet returning full page results!! Need to finish getting all 
+    # page data from API's json!! *******************
     return "Pieces by cpdl:" + str(pieces_by_cpdl)
     # data = {}
 

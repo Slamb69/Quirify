@@ -1,0 +1,69 @@
+users:
+Me1, Mememe1, Me1@me.com, 1234, Mini1, 415-555-1212
+Me2, Mememe2, Me2@me.com, 2234, Mini2, 425-555-2222
+
+PerfGroups:
+RR, Revels Roses, Really cool SSAA(T) group 1, 2/7/2001
+RSND, Resound Ensemble, Really cool SATB group 2, 2/7/2002
+TV, Treble Voices, Really cool SSAA group, 3/7/2003
+CV, Cathedral Voices, Awesome SATB group, 3/3/2004
+
+Owners:
+Me Mememe, me@me.com
+Group2, group@me.com
+
+Performers:
+First1| Last1| email1| phone1| 1/1/2001| |51.75| Really great soprano plus violin
+First2| Last2| email2| phone2| 2/2/2002| 5/5/2007 || Really great soprano1, 2 or alto 1
+First3| Last3| email3| phone3| 3/3/2003|| Second sop or Alto 1, 2
+First4| Last4| email4| phone4| 4/4/2004|| Alto 1, 2, Tenor 1, Guitar, Harp
+First5| Last5| email5| phone5| 5/5/2005|| Tenor 1, 2, or Baritone
+First6| Last6| email6| phone6| 6/6/2006|| Baritone or Bass 1, 2, Drums
+
+Instruments:
+S1, Soprano 1
+S2, Soprano 2
+A1, Alto 1
+A2, Alto 2
+T1, Tenor 1
+T2, Tenor 2
+BAR, Baritone
+B1, Bass 1
+B2, Bass 2
+VLN1, Violin 1
+VLA1, Viola 1
+GTR, Guitar
+HRP, Harp
+TMP, Timpani/drums
+
+Providers:
+Choral Public Domain Library (CPDL)
+Me Mememe
+
+Pieces:
+Ecco Mormorar L'onde, 3788, secular madrigal, Claudio Monteverdi, Torquato Tasso, 1590, SSATB, F, Italian
+
+
+Sheets:
+1, 1, 1, http://www1.cpdl.org/wiki/images/8/8eMont-ecc.pdf, 31983, Peter Rottlander, , SSATB, a cappella, Italian, , F, 4/4, , , Vocal Score, CPDL
+1, 2, 1, http://www1.cpdl.org/wiki/images/c/cc/149.pdf, 10945, Brian Russell, , SSTTB, a cappella, Italian, , F, 4/4, , , Vocal Score, CPDL
+
+PieceFiles:
+1, Midi file
+2, Midi file
+2, Noteworthy file
+
+Setlists:
+Resound Spring 2017, Spring concert songs, with piano & cello
+Roses Scottish 2017, Scottish Games set
+
+Concerts:
+Love is a Place, Resound's spring 2013 concerts
+Scottish Games, Revels Roses 2017 Scottish games 
+
+Events:
+1, 1, Love is a Place - Thursday, St. Aiden's, May-30-2013-8:00PM, May-30-2013-10:00PM
+1, 1, Love is a Place - Friday, St. Aiden's, May-31-2013-8:00PM, May-31-2013-10:00PM
+2, 2, Revels Roses Scottish Games, Danville, Sep-2-2017-1:00PM, Sep-2-2017-2:00PM
+
+

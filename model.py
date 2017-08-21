@@ -177,8 +177,6 @@ class Roster(db.Model):
                              db.ForeignKey('performers.performer_id'),
                              nullable=False)
     name = db.Column(db.String(128), nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date)
 
     # Define a relationship w/PerformanceGroup class via perf_group_code foreign key.
     perf_group = db.relationship('PerformanceGroup', backref='rosters')
@@ -209,22 +207,8 @@ class Provider(db.Model):
         return "<Provider id=%d name=%s>" % (self.provider_id, self.name)
 
 
-class SoundFiles(db.Model):
-    """Holds any midi or other sound files for the piece."""
-        # create the db columns.
-    file_id = db.Column(db.Integer,
-                        primary_key=True,
-                        autoincrement=True)
-    piece_id = db.Column(db.Integer,
-                         db.ForeignKey('pieces.piece_id'),
-                         nullable=False)
-
-    # Define a relationship w/Piece class via piece_id foreign key.
-    piece = db.relationship('Piece', backref='sound_files')
-
-
 class Piece(db.Model):
-    """Piece model, for each piece (sheet music)."""
+    """Piece model, for each piece (can have multiple editions)."""
 
     __tablename__ = "pieces"
 
@@ -232,41 +216,19 @@ class Piece(db.Model):
     piece_id = db.Column(db.Integer,
                          primary_key=True,
                          autoincrement=True)
-    # ASK = OK for this FK to be nullable? (piece not yet owned/borrowed...)
-    owner_id = db.Column(db.Integer,
-                         db.ForeignKey('owners.owner_id'))
-    provider_id = db.Column(db.Integer,
-                            db.ForeignKey('providers.provider_id'),
-                            nullable=False)
     title = db.Column(db.String(150), nullable=False)
     # page_id = this is from CPDL API, they have "page id" that is useful!
     page_id = db.Column(db.Integer)
-    cpdl_num = db.Column(db.String(5))
-    music_url = db.Column(db.String(150))
     genre = (db.String(248))             # ??? NEEDS GENRE TABLE?
     composer = db.Column(db.String(248), nullable=False)
     lyricist = db.Column(db.String(248))
-    arranger = db.Column(db.String(248))
     publication_year = db.Column(db.String(48))
+    original_voicing = db.Column(db.String(48))
+    original_key = db.Column(db.String(48))
     original_language = db.Column(db.String(48))
-    voicing = db.Column(db.String(248))
-    instrumentation = db.Column(db.String(248))
-    key = db.Column(db.String(48))
-    time_signature = (db.String(48))
-    tempo = db.Column(db.String(128))
     text_original = db.Column(db.String(2048))
     text_english = db.Column(db.String(2048))
-    score_type = db.Column(db.String(248))
-    license_type = db.Column(db.String(40))
-    num_lic_owned = db.Column(db.Integer)
     description = (db.String(2048))
-    # price_per = db.Column(db.???) ?????????Add this later, maybe - type?
-
-    # Define a relationship w/Owner class via owner_id foreign key.
-    owner = db.relationship('Owner', backref='pieces')
-
-    # Define a relationship w/Provider class via provider_id foreign key.
-    provider = db.relationship('Provider', backref='pieces')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -276,8 +238,66 @@ class Piece(db.Model):
                                                              self.composer)
 
 
+class SheetMusic(db.Model):
+    """The sheet music for a particular edition/version of a piece."""
+
+    __tablename__ = "sheets"
+
+    # create the db columns.
+    sheet_id = db.Column(db.Integer,
+                         primary_key=True,
+                         autoincrement=True)
+    # ASK = OK for this FK to be nullable? (piece not yet owned/borrowed...)
+    piece_id = db.Column(db.Integer,
+                         db.ForeignKey('pieces.piece_id'))
+    owner_id = db.Column(db.Integer,
+                         db.ForeignKey('owners.owner_id'))
+    provider_id = db.Column(db.Integer,
+                            db.ForeignKey('providers.provider_id'),
+                            nullable=False)
+    music_url = db.Column(db.String(150))
+    cpdl_num = db.Column(db.String(5))
+    editor = db.Column(db.String(248))
+    arranger = db.Column(db.String(248))
+    voicing = db.Column(db.String(248))
+    instrumentation = db.Column(db.String(248))
+    language = db.Column(db.String(48))
+    alt_language = db.Column(db.String(48))
+    key = db.Column(db.String(48))
+    time_signature = db.Column(db.String(48))
+    tempo = db.Column(db.String(128))
+    score_type = db.Column(db.String(248))
+    license_type = db.Column(db.String(40))
+    num_lic_owned = db.Column(db.Integer)
+    # price_per = db.Column(db.??type?) ?????????Add this later, maybe?
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    piece = db.relationship('Piece', backref='sheets')
+
+    # Define a relationship w/Owner class via owner_id foreign key.
+    owner = db.relationship('Owner', backref='sheets')
+
+    # Define a relationship w/Provider class via provider_id foreign key.
+    provider = db.relationship('Provider', backref='sheets')
+
+
+class PieceFile(db.Model):
+    """Holds any midi or other sound files for the piece."""
+        # create the db columns.
+    file_id = db.Column(db.Integer,
+                        primary_key=True,
+                        autoincrement=True)
+    sheet_id = db.Column(db.Integer,
+                         db.ForeignKey('sheets.sheet_id'),
+                         nullable=False)
+    description = db.Column(db.String(48))
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    sheet = db.relationship('SheetMusic', backref='sound_files')
+
+
 class Assignment(db.Model):
-    """Assignment model, specific performer/instrument for each piece."""
+    """Assignment model, specific performer/instrument for each sheet."""
 
     __tablename__ = "assignments"
 
@@ -285,8 +305,8 @@ class Assignment(db.Model):
     assignment_id = db.Column(db.Integer,
                               primary_key=True,
                               autoincrement=True)
-    piece_id = db.Column(db.Integer,
-                         db.ForeignKey('pieces.piece_id'),
+    sheet_id = db.Column(db.Integer,
+                         db.ForeignKey('sheets.sheet_id'),
                          nullable=False)
     roster_id = db.Column(db.Integer,
                           db.ForeignKey('rosters.roster_id'),
@@ -294,8 +314,8 @@ class Assignment(db.Model):
     pi_id = db.Column(db.Integer,
                       db.ForeignKey('performer_instruments.pi_id'))
 
-    # Define a relationship w/Piece class via piece_id foreign key.
-    piece = db.relationship('Piece', backref='assignments')
+    # Define a relationship w/SheetMusic class via sheet_id foreign key.
+    sheet = db.relationship('SheetMusic', backref='assignments')
 
     # Define a relationship w/Roster class via roster_id foreign key.
     roster = db.relationship('Roster', backref='assignments')
@@ -369,7 +389,8 @@ class Concert(db.Model):
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
                         nullable=False)
-    name = db.Column(db.String(64))
+    name = db.Column(db.String(64),
+                     nullable=False)
     description = db.Column(db.String(2048))
 
     # Define a relationship w/User class via user_id foreign key.
@@ -428,12 +449,13 @@ def init_app():
     connect_to_db(app)
     print "Connected to DB."
 
+
 # Configure to use our PostgreSQL database.
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use our database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///music'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///musictest'
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app

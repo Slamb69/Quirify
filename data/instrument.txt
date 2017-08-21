@@ -1,0 +1,14 @@
+S1, Soprano 1
+S2, Soprano 2
+A1, Alto 1
+A2, Alto 2
+T1, Tenor 1
+T2, Tenor 2
+BAR, Baritone
+B1, Bass 1
+B2, Bass 2
+VLN1, Violin 1
+VLA1, Viola 1
+GTR, Guitar
+HRP, Harp
+TMP, Timpani/drums
