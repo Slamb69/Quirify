@@ -13,6 +13,16 @@
         <a href="/pieces/{{ piece.piece_id }}">
           {{ piece.title }} ({{ piece.composer }})
         </a>
+        {% if piece.sheets %}
+          <ul>
+            {% for sheet in piece.sheets %}
+              <li><a href="/sheets/{{ sheet.sheet_id }}">
+                {{ sheet.version_description }} ({{ sheet.voicing }}, {{ sheet.key}})
+              </a>
+            </li>
+            {% endfor %}
+          </ul> 
+        {% endif %}
       </li>
     {% endfor %}
   </ul>

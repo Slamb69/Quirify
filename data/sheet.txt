@@ -1,2 +1,2 @@
-1, 1, 1, http://www1.cpdl.org/wiki/images/8/8eMont-ecc.pdf, 31983, Peter Rottlander, SSATB, a cappella, Italian, F, 4/4, Vocal Score, CPDL
-1, 2, 1, http://www1.cpdl.org/wiki/images/c/cc/149.pdf, 10945, Brian Russell, SSTTB, a cappella, Italian, F, 4/4, Vocal Score, CPDL
+1, 1, 1, http://www1.cpdl.org/wiki/images/8/8eMont-ecc.pdf, 31983, Peter Rottlander, SSATB, a cappella, Italian, F, 4/4, Vocal Score, CPDL, Favorite version for original voicing and key.
+1, 2, 1, http://www1.cpdl.org/wiki/images/c/cc/149.pdf, 10945, Brian Russell, SSTTB, a cappella, Italian, F, 4/4, Vocal Score, CPDL, Nice setting for S-T-B (boys & men?)

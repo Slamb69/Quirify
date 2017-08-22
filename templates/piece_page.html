@@ -1,11 +1,27 @@
 {% extends 'base.html' %}
 
 <head>
-    <title>{% block title %}{{ (piece.name) }}{% endblock%}</title>
+    <title>{% block title %}{{ (piece.title) }}{% endblock%}</title>
 </head>
 
 {% block content %}
-
-ADD PIECE DATA HERE, WIP!!!!!
+<div> <h2>{{ piece.title }} ({{ piece.composer }})</h2><br>
+  <ul>
+    <li>Lyricist: {{ piece.lyricist }}</li>
+    <li>Genre: {{ piece.genre }}</li>
+    <li>Publication date: {{ piece.publication_year }}</li>
+    <li>Original Voicing: {{ piece.original_voicing }}</li>
+    <li>Original Key: {{ piece.original_key }}</li>
+    <li>Original Language: {{ piece.original_language }}</li>
+  </ul>
+</div>
+  {% if piece.sheets %}
+    <div><h3>Sheet music versions:</h3>
+      <ul>{% for sheet in piece.sheets %}
+        <li><a href="/sheets/{{ sheet.sheet_id }}">{{ sheet.piece.title }} 
+          ({{ sheet.voicing }}, {{ sheet.key}})</a></li>
+      {% endfor %}</ul>
+    </div>
+  {% endif %}
 
 {% endblock %}

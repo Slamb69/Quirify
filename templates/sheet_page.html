@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}{{ sheet.version_description }}{% endblock%}</title>
+</head>
+
+{% block content %}
+<div> <a href="{{ sheet.music_url }}"><h2>{{ sheet.version_description}} 
+       ({{ sheet.voicing }}, {{ sheet.key }})</h2></a><br>
+  <ul>
+    <li>Editor: {{ sheet.editor }}</li>
+    <li>Arranger: {{ sheet.arranger }}</li>
+    <li>Instrumentation: {{ sheet.instrumentation }}</li>
+    <li>Language: {{ sheet.language }}</li>
+    {% if sheet.alt_language %}<li>Alternate language: {{ sheet.alt_language }}</li>
+    {% endif %}
+    <li>Time Signature: {{ sheet.time_signature }}</li>
+    <li>Tempo: {{ sheet.tempo }}</li>
+    <li>Score Type: {{ sheet.score_type }}</li>
+    <li>License Type: {{ sheet.license_type }}</li>
+    <li>Licenses owned: {{ sheet.num_lic_owned }}</li>
+    <li>Owner: {{ sheet.owner.name }}</li>
+    <li>Source: {{ sheet.provider.name }}</li>
+  </ul>
+</div>
+  {% if sheet.audiofiles %}
+    <div>
+      {% for aud in sheet.audiofiles %}
+      <a href="{{ aud.url }}">{{ aud.file_type }} ({{ aud.voicing_details }})</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+{% endblock %}

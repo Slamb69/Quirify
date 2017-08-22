@@ -219,7 +219,7 @@ class Piece(db.Model):
     title = db.Column(db.String(150), nullable=False)
     # page_id = this is from CPDL API, they have "page id" that is useful!
     page_id = db.Column(db.Integer)
-    genre = (db.String(248))             # ??? NEEDS GENRE TABLE?
+    genre = db.Column(db.String(248))             # ??? NEEDS GENRE TABLE?
     composer = db.Column(db.String(248), nullable=False)
     lyricist = db.Column(db.String(248))
     publication_year = db.Column(db.String(48))
@@ -255,6 +255,7 @@ class SheetMusic(db.Model):
     provider_id = db.Column(db.Integer,
                             db.ForeignKey('providers.provider_id'),
                             nullable=False)
+    version_description = db.Column(db.String(248))
     music_url = db.Column(db.String(150))
     cpdl_num = db.Column(db.String(5))
     editor = db.Column(db.String(248))
@@ -281,7 +282,7 @@ class SheetMusic(db.Model):
     provider = db.relationship('Provider', backref='sheets')
 
 
-class PieceFile(db.Model):
+class AudioFile(db.Model):
     """Holds any midi or other sound files for the piece."""
         # create the db columns.
     file_id = db.Column(db.Integer,
@@ -290,10 +291,12 @@ class PieceFile(db.Model):
     sheet_id = db.Column(db.Integer,
                          db.ForeignKey('sheets.sheet_id'),
                          nullable=False)
-    description = db.Column(db.String(48))
+    file_type = db.Column(db.String(48))
+    voicing_details = db.Column(db.String(150))
+    url = db.Column(db.String(150))
 
     # Define a relationship w/Piece class via piece_id foreign key.
-    sheet = db.relationship('SheetMusic', backref='sound_files')
+    sheet = db.relationship('SheetMusic', backref='audiofiles')
 
 
 class Assignment(db.Model):

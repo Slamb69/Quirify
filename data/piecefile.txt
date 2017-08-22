@@ -1,3 +1,0 @@
-1, Midi file
-2, Midi file
-2, Noteworthy file

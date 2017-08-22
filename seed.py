@@ -4,7 +4,7 @@ import datetime
 # from sqlalchemy import func
 
 from model import (User, Concert, Event, Instrument, Owner, PerformanceGroup,
-                   Performer, Piece, PieceFile, Provider, Setlist, SheetMusic,
+                   Performer, Piece, AudioFile, Provider, Setlist, SheetMusic,
                    Roster, PerformerInstrument, Assignment, AssignedSet,
                    connect_to_db, db)
 from server import app
@@ -235,7 +235,7 @@ def load_sheets():
         row = row.rstrip()
 
         (pid, oid, prid, url, cpdl, ed, vc, inst,
-         lang, key, time, scr, lic) = row.split(", ")
+         lang, key, time, scr, lic, ver_desc) = row.split(", ")
 
         sheet = SheetMusic(piece_id=pid,
                            owner_id=oid,
@@ -249,7 +249,8 @@ def load_sheets():
                            key=key,
                            time_signature=time,
                            score_type=scr,
-                           license_type=lic)
+                           license_type=lic,
+                           version_description=ver_desc)
 
         # Add to the session.
         db.session.add(sheet)
@@ -258,21 +259,23 @@ def load_sheets():
     db.session.commit()
 
 
-def load_piecefiles():
-    """Load piece (audio) files from piecefile.txt into database."""
+def load_audiofiles():
+    """Load audio files from audiofile.txt into database."""
 
-    print "Piece Files"
+    print "Audio Files"
 
-    for i, row in enumerate(open("data/piecefile.txt")):
+    for i, row in enumerate(open("data/audiofile.txt")):
         row = row.rstrip()
 
-        sheet_id, description = row.split(", ")
+        sheet_id, file_type, voicing, url = row.split(", ")
 
-        piecefile = PieceFile(sheet_id=sheet_id,
-                              description=description)
+        audiofile = AudioFile(sheet_id=sheet_id,
+                              file_type=file_type,
+                              voicing_details=voicing,
+                              url=url)
 
         # Add to the session.
-        db.session.add(piecefile)
+        db.session.add(audiofile)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -415,7 +418,7 @@ if __name__ == "__main__":
     load_providers()
     load_pieces()
     load_sheets()
-    load_piecefiles()
+    load_audiofiles()
     load_assignments()
     load_setlists()
     load_assigned_sets()
