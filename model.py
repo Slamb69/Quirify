@@ -255,7 +255,8 @@ class SheetMusic(db.Model):
     provider_id = db.Column(db.Integer,
                             db.ForeignKey('providers.provider_id'),
                             nullable=False)
-    version_description = db.Column(db.String(248))
+    version_description = db.Column(db.String(248),
+                                    nullable=False)
     music_url = db.Column(db.String(150))
     cpdl_num = db.Column(db.String(5))
     editor = db.Column(db.String(248))
@@ -283,8 +284,11 @@ class SheetMusic(db.Model):
 
 
 class AudioFile(db.Model):
-    """Holds any midi or other sound files for the piece."""
-        # create the db columns.
+    """Holds any midi or other sound files for the piece (you tube also okay)."""
+
+    __tablename__ = "audiofiles"
+
+    # create the db columns.
     file_id = db.Column(db.Integer,
                         primary_key=True,
                         autoincrement=True)
@@ -436,6 +440,99 @@ class Event(db.Model):
         """Print more useful info."""
         return ("<Event event_id=%d location=%s start_day_time=%s>"
                 % (self.event_id, self.location, self.start_day_time))
+
+################# ASSOCIATION TABLES FOR SAVING TO USER ####################
+
+
+class UserPiece(db.Model):
+    """User piece object, associating each user with their pieces."""
+
+    __tablename__ = "user_pieces"
+
+    # create the db columns.
+    up_id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False)
+    piece_id = db.Column(db.Integer,
+                         db.ForeignKey('pieces.piece_id'),
+                         nullable=False)
+
+    # Define a relationship w/User class via user_id foreign key.
+    user = db.relationship('User', backref='user_pieces')
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    piece = db.relationship('Piece', backref='user_pieces')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<User Piece f=%s l=%s piece=%s>" % (self.user.fname,
+                                                    self.user.lname,
+                                                    self.piece.title)
+
+
+class UserSheet(db.Model):
+    """User sheet object, associating each user with their sheets (of music)."""
+
+    __tablename__ = "user_sheets"
+
+    # create the db columns.
+    us_id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False)
+    sheet_id = db.Column(db.Integer,
+                         db.ForeignKey('sheets.sheet_id'),
+                         nullable=False)
+
+    # Define a relationship w/User class via user_id foreign key.
+    user = db.relationship('User', backref='user_sheets')
+
+    # Define a relationship w/SheetMusic class via sheet_id foreign key.
+    sheet = db.relationship('SheetMusic', backref='user_sheets')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<User Sheet f=%s l=%s sheet=%s>" % (self.user.fname,
+                                                    self.user.lname,
+                                                    self.sheet.version_description)
+
+
+class UserAudioFile(db.Model):
+    """User AudioFile object, associating each user with their audio (youtube)
+       files."""
+
+    __tablename__ = "user_files"
+
+    # create the db columns.
+    uaf_id = db.Column(db.Integer,
+                       primary_key=True,
+                       autoincrement=True)
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False)
+    file_id = db.Column(db.Integer,
+                        db.ForeignKey('audiofiles.file_id'),
+                        nullable=False)
+
+    # Define a relationship w/User class via user_id foreign key.
+    user = db.relationship('User', backref='user_files')
+
+    # Define a relationship w/AudioFile class via file_id foreign key.
+    audiofile = db.relationship('AudioFile', backref='user_files')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<User File f=%s l=%s file=%s>" % (self.user.fname,
+                                                  self.user.lname,
+                                                  self.file.file_type)
 
 
 # End Part 1

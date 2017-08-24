@@ -17,9 +17,9 @@
 </div>
   {% if piece.sheets %}
     <div><h3>Sheet music versions:</h3>
-      <ul>{% for sheet in piece.sheets %}
-        <li><a href="/sheets/{{ sheet.sheet_id }}">{{ sheet.piece.title }} 
-          ({{ sheet.voicing }}, {{ sheet.key}})</a></li>
+      <ul style="list-style-type:none">{% for sheet in piece.sheets %}
+        <li><a href="/sheets/{{ sheet.sheet_id }}">#{{ sheet.sheet_id }}:
+          {{ sheet.piece.title }} ({{ sheet.voicing }}, {{ sheet.key}})</a></li>
       {% endfor %}</ul>
     </div>
   {% endif %}
