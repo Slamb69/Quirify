@@ -18,11 +18,60 @@ def parse_search_results(results):
 
 def parse_page_results(results):
     """Returns each page's results."""
+    # Get the page title.
+    page_title = results['parse']['title']
     # Pull data from the page's html - first, get the page "text" from the json.
     page_txt = results['parse']['text']['*']
 
     # Make beautiful soup from page text's html
     soup = BeautifulSoup(page_txt, "lxml")
+
+
+    orig_lang = None
+    orig_poem = None
+    eng_txt = None
+    lyricist = None
+    orig_num_voices = None
+    orig_voicing = None
+    genre = None
+    orig_inst = None
+
+
+    # Get general info about the piece:
+    for each in soup('b'):
+        if "Composer:" in each.contents:
+            composer = each.next_element.next_element.next_element.string
+        if "Lyricist:" in each.contents:
+            lyricist = each.next_element.next_element.next_element.string
+        if "Number of voices:" in each.contents:
+            orig_num_voices = int((each.next_element.next_element.string)
+                                  .replace("vv", "").replace("v", ""))
+        if "Voicing:" in each.contents:
+            orig_voicing = each.next_element.next_element.next_element.string
+######### GENRE IS A TUPLE = OKAY, or need ", ".join(genre) for a string?
+        if "Genre:" in each.contents:
+            genre = (each.next_element.next_element.next_element.string,
+                     each.next_element.next_element.next_element.next_element.next_element.next_element.string)
+        if "Language:" in each.contents:
+            orig_lang = each.next_element.next_element.next_element.string
+        if "Instruments:" in each.contents:
+            orig_inst = each.next_element.next_element.next_element.string
+        if "Description:" in each.contents:
+            description = each.parent.get_text().replace("Description: ", '')
+
+
+    # Get the year published.
+    pub_year = soup.find('a', title=(re.compile("Category:\d\d\d\d works"))).string
+
+    # Get the original language's text, if any provided.
+    if soup.big.contents[1]:
+        orig_poem = soup('div', 'poem')[0]
+
+    # Look to see if there are any texts in English - if so, pull that 'poem', too.
+    if soup('big') and orig_lang != 'English':
+        for i, each in enumerate(soup('big')):
+            if 'English' in each.contents[1]:
+                eng_txt = soup('div', 'poem')[i]
 
     # Get CPDL numbers for each piece's sheet music / midi
     cpdl_nums = map(lambda x: x.string, soup('font'))
@@ -160,3 +209,18 @@ def get_urls(filelist, num):
     urls = sorted(urls_raw, key=lambda x: x.split('/')[7])
 
     return urls
+
+
+def add_piece(data):
+    """Adds piece to the database."""
+
+
+def add_sheet(data):
+    """Adds a sheet to the database."""
+
+
+def add_file(data):
+    """Adds a file to the database."""
+
+
+

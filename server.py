@@ -106,6 +106,7 @@ def login_process():
     session["user_id"] = user.user_id
 
     flash("Logged in")
+
     return redirect("/users/%s" % user.user_id)
 
 
@@ -150,17 +151,25 @@ def search_cpdl_page():
 
     value = request.args.get("page_id")
 
-    payload = {'pageid': value}
+    piece = Piece.query.filter_by(page_id=value).first()
 
-    # cpdl_search = 'http://www1.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
+    if not piece:
+        payload = {'pageid': value}
 
-    r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=parse&format=json', params=payload)
+        # cpdl_search = 'http://www1.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
 
-    results = r1.json()
+        r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=parse&format=json', params=payload)
 
-    cpdls = parse_page_results(results)
+        results = r1.json()
 
-    return render_template("search_result2.html", cpdls=cpdls)
+        page_data = parse_page_results(results)
+
+        # be sure to make piece = result from dbase for new piece_id!!!!!
+
+
+    
+
+    return redirect("/pieces/%s" % piece=piece)
 
 
 @app.route("/users/<int:user_id>")

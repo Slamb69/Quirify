@@ -217,14 +217,14 @@ class Piece(db.Model):
                          primary_key=True,
                          autoincrement=True)
     title = db.Column(db.String(150), nullable=False)
-    # page_id = this is from CPDL API, they have "page id" that is useful!
+    # page_id = this is from CPDL API, they have "page id" that is useful! create
+    # a disparate "page id" system for uploads, like initial letter(s)? #########
     page_id = db.Column(db.Integer)
-    genre = db.Column(db.String(248))             # ??? NEEDS GENRE TABLE?
     composer = db.Column(db.String(248), nullable=False)
     lyricist = db.Column(db.String(248))
     publication_year = db.Column(db.String(48))
+    original_num_voices = db.Column(db.Integer)
     original_voicing = db.Column(db.String(48))
-    original_key = db.Column(db.String(48))
     original_language = db.Column(db.String(48))
     text_original = db.Column(db.String(2048))
     text_english = db.Column(db.String(2048))
@@ -255,12 +255,13 @@ class SheetMusic(db.Model):
     provider_id = db.Column(db.Integer,
                             db.ForeignKey('providers.provider_id'),
                             nullable=False)
-    version_description = db.Column(db.String(248),
-                                    nullable=False)
     music_url = db.Column(db.String(150))
     cpdl_num = db.Column(db.String(5))
     editor = db.Column(db.String(248))
+    edition_notes = db.Column(db.String(596),
+                              nullable=False)
     arranger = db.Column(db.String(248))
+    num_voices = db.Column(db.Integer)
     voicing = db.Column(db.String(248))
     instrumentation = db.Column(db.String(248))
     language = db.Column(db.String(48))
@@ -301,6 +302,30 @@ class AudioFile(db.Model):
 
     # Define a relationship w/Piece class via piece_id foreign key.
     sheet = db.relationship('SheetMusic', backref='audiofiles')
+
+
+class Genre(db.model):
+    """Genre model."""
+
+    __tablename__ = "genres"
+
+    #create the db columns.
+    genre_id = db.Column(db.Integer,
+                         primary_key=True,
+                         autoincrement=True)
+    piece_id = db.Column(db.Integer,
+                         db.ForeignKey('pieces.piece_id'))
+    name = db.Column(db.String(248),
+                     nullable=False)
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    piece = db.relationship('Piece', backref='genres')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<Genre id=%s name=%s>" % (self.instrument_code,
+                                          self.name)
 
 
 class Assignment(db.Model):

@@ -132,21 +132,25 @@ def parse_page_results(results):
 #  u'  French  translation',
 #  u'  Czech  translation']
 
-# Get the original language and text, if any provided.
-if soup.big.contents[1]:
-    orig_lang = soup.big.contents[1].replace('text', '').strip()
-    orig_poem = soup('div', 'poem')[0]
+    # Get the original language and text, if any provided.
+    orig_lang = None
+    orig_poem = None
+    eng_txt = None
 
-# Look to see if there are any texts in English - if so, pull that 'poem', too.
-if soup('big'):
-    for i, each in enumerate(soup('big')):
-        if "English" in each.contents[1]:
-            eng_txt =  soup('div', 'poem')[i]
+    if soup.big.contents[1]:
+        orig_lang = soup.big.contents[1].replace('text', '').strip()
+        orig_poem = soup('div', 'poem')[0]
+
+    # Look to see if there are any texts in English - if so, pull that 'poem', too.
+    if soup('big'):
+        for i, each in enumerate(soup('big')):
+            if "English" in each.contents[1]:
+                eng_txt = soup('div', 'poem')[i]
 
 
 
 
-# ALL STRINGS ON PAGE = 
+# ALL STRINGS ON PAGE =
 # for string in soup.stripped_strings:
      # print(repr(string))
 

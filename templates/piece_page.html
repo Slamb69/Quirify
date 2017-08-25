@@ -6,21 +6,34 @@
 
 {% block content %}
 <div> <h2>{{ piece.title }} ({{ piece.composer }})</h2><br>
-  <ul>
+  <ul style="list-style-type:none">
     <li>Lyricist: {{ piece.lyricist }}</li>
-    <li>Genre: {{ piece.genre }}</li>
-    <li>Publication date: {{ piece.publication_year }}</li>
+    <li>Genre: {% for genre in piece.genres %} {{ genre }} {% endfor %}</li>
+    <li>Publication Year: {{ piece.publication_year }}</li>
+    <li>Number of voices: {{ piece.original_num_voices }}</li>
     <li>Original Voicing: {{ piece.original_voicing }}</li>
-    <li>Original Key: {{ piece.original_key }}</li>
     <li>Original Language: {{ piece.original_language }}</li>
+    <li>Description: {{ piece.description }}</li>
   </ul>
 </div>
   {% if piece.sheets %}
     <div><h3>Sheet music versions:</h3>
       <ul style="list-style-type:none">{% for sheet in piece.sheets %}
         <li><a href="/sheets/{{ sheet.sheet_id }}">#{{ sheet.sheet_id }}:
-          {{ sheet.piece.title }} ({{ sheet.voicing }}, {{ sheet.key}})</a></li>
+          {{ sheet.piece.title }} ({{ sheet.edition_notes }})</a></li>
       {% endfor %}</ul>
+    </div>
+  
+  {% endif %}
+    {% if piece.text_original %}
+    <div><h3>Original {{ sheet.original_language }} Text:</h3>
+      <div>{{ text_original }}</div>
+    </div>
+  {% endif %}
+
+  {% if piece.text_english %}
+    <div><h3>English Translation:</h3>
+      <div>{{ text_english }}</div>
     </div>
   {% endif %}
 
