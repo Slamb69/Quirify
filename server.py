@@ -7,10 +7,12 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (User, Concert, Event, Instrument, Owner, PerformanceGroup,
                    Performer, Piece, AudioFile, Provider, Setlist, SheetMusic,
-                   Roster, PerformerInstrument, Assignment, AssignedSet,
+                   Roster, PerformerInstrument, Assignment, AssignedSet, Genre,
+                   PieceGenre, UserPiece, UserSheet, UserAudioFile,
                    connect_to_db, db)
 
-from helper_functions import parse_search_results, parse_page_results,
+from helper_functions import (parse_search_results, parse_page_results)
+
 import requests
 # To get text from CPDL pages, need Beautiful Soup!!
 from bs4 import BeautifulSoup
@@ -129,7 +131,7 @@ def search_cpdl():
 
     r1 = requests.get('http://www1.cpdl.org/wiki/api.php?action=query&format=json&prop=info&generator=search&gsrlimit=max', params=payload)
 
-    print "THIS IS THE JSON: " + str(r1.json())
+    # print "THIS IS THE JSON: " + str(r1.json())
 
     if str(r1.json()) != "{u'limits': {u'search': 50}}":
         results = r1.json()
@@ -162,14 +164,14 @@ def search_cpdl_page():
 
         results = r1.json()
 
-        page_data = parse_page_results(results)
+        page_data = parse_page_results(results, value)
 
         # be sure to make piece = result from dbase for new piece_id!!!!!
 
 
     
 
-    return redirect("/pieces/%s" % piece=piece)
+    # return redirect("/pieces/%s" % piece=piece)
 
 
 @app.route("/users/<int:user_id>")

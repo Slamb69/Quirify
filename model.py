@@ -199,7 +199,7 @@ class Provider(db.Model):
     provider_id = db.Column(db.Integer,
                             primary_key=True,
                             autoincrement=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(96), nullable=False)
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -222,10 +222,11 @@ class Piece(db.Model):
     page_id = db.Column(db.Integer)
     composer = db.Column(db.String(248), nullable=False)
     lyricist = db.Column(db.String(248))
-    publication_year = db.Column(db.String(48))
+    publication_year = db.Column(db.String(56))
     original_num_voices = db.Column(db.Integer)
-    original_voicing = db.Column(db.String(48))
-    original_language = db.Column(db.String(48))
+    original_voicing = db.Column(db.String(56))
+    original_language = db.Column(db.String(56))
+    original_instrumentation = db.Column(db.String(248))
     text_original = db.Column(db.String(2048))
     text_english = db.Column(db.String(2048))
     description = (db.String(2048))
@@ -304,7 +305,7 @@ class AudioFile(db.Model):
     sheet = db.relationship('SheetMusic', backref='audiofiles')
 
 
-class Genre(db.model):
+class Genre(db.Model):
     """Genre model."""
 
     __tablename__ = "genres"
@@ -313,19 +314,41 @@ class Genre(db.model):
     genre_id = db.Column(db.Integer,
                          primary_key=True,
                          autoincrement=True)
-    piece_id = db.Column(db.Integer,
-                         db.ForeignKey('pieces.piece_id'))
     name = db.Column(db.String(248),
                      nullable=False)
-
-    # Define a relationship w/Piece class via piece_id foreign key.
-    piece = db.relationship('Piece', backref='genres')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return "<Genre id=%s name=%s>" % (self.instrument_code,
+        return "<Genre id=%s name=%s>" % (self.genre_id,
                                           self.name)
+
+
+class PieceGenre(db.Model):
+    """Piece & its Genres association model."""
+
+    __tablename__ = "piece_genres"
+
+    #create the db columns.
+    pg_id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    genre_id = db.Column(db.Integer,
+                         db.ForeignKey('genres.genre_id'))
+    piece_id = db.Column(db.Integer,
+                         db.ForeignKey('pieces.piece_id'))
+
+    # Define a relationship w/Piece class via piece_id foreign key.
+    piece = db.relationship('Piece', backref='piece_genres')
+
+    # Define a relationship w/Genre class via genre_id foreign key.
+    genre = db.relationship('Genre', backref='piece_genres')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<Piece Genres piece=%s genre=%s>" % (self.piece.title,
+                                                     self.genre.name)
 
 
 class Assignment(db.Model):

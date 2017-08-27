@@ -6,9 +6,12 @@
 
 {% block content %}
 <div> <a href="{{ sheet.music_url }}" target="_blank"><h2>{{ sheet.piece.title }} 
-       ({{ sheet.voicing }}, {{ sheet.key }})</h2></a>
-  {% if sheet.version_description %}
-    <h3>My version description: {{ sheet.version_description}}</h3>
+       ({% if sheet.voicing %}{{ sheet.voicing }}
+          {% else %}{{ sheet.piece.original_voicing }}
+          {% endif %}
+        {% if sheet.key %}, {{ sheet.key }}{% endif %})</h2></a>
+  {% if sheet.edition_notes %}
+    <h3>Edition notes: {{ sheet.edition_notes}}</h3>
   {% endif %}
       <ul>
         <li>Editor: {{ sheet.editor }}</li>

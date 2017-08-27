@@ -5,7 +5,8 @@ import datetime
 
 from model import (User, Concert, Event, Instrument, Owner, PerformanceGroup,
                    Performer, Piece, AudioFile, Provider, Setlist, SheetMusic,
-                   Roster, PerformerInstrument, Assignment, AssignedSet,
+                   Roster, PerformerInstrument, Assignment, AssignedSet, Genre,
+                   PieceGenre, UserPiece, UserSheet, UserAudioFile,
                    connect_to_db, db)
 from server import app
 
@@ -207,11 +208,10 @@ def load_pieces():
     for i, row in enumerate(open("data/piece.txt")):
         row = row.rstrip()
 
-        title, pg_id, genre, comp, lyric, pub_yr, ovoice, okey, lang = row.split(", ")
+        title, pg_id, comp, lyric, pub_yr, ovoice, okey, lang = row.split(", ")
 
         piece = Piece(title=title,
                       page_id=pg_id,
-                      genre=genre,
                       composer=comp,
                       lyricist=lyric,
                       publication_year=pub_yr,
@@ -276,6 +276,23 @@ def load_audiofiles():
 
         # Add to the session.
         db.session.add(audiofile)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_genres():
+    """Load genres from genre.txt into database."""
+
+    print "Genres"
+
+    for i, name in enumerate(open("data/genre.txt")):
+        name = name.rstrip()
+
+        genre = Genre(name=name)
+
+        # Add to the session.
+        db.session.add(genre)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -419,6 +436,7 @@ if __name__ == "__main__":
     load_pieces()
     load_sheets()
     load_audiofiles()
+    load_genres()
     load_assignments()
     load_setlists()
     load_assigned_sets()
