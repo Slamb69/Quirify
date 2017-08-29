@@ -21,11 +21,11 @@
         {% if sheet.alt_language %}<li>Alternate language: {{ sheet.alt_language }}</li>
         {% endif %}
         <li>Time Signature: {{ sheet.time_signature }}</li>
-        <li>Tempo: {{ sheet.tempo }}</li>
+        <li>Tempo: {{ sheet.tempo | none_filter }}</li>
         <li>Score Type: {{ sheet.score_type }}</li>
         <li>License Type: {{ sheet.license_type }}</li>
         <li>Licenses owned: {{ sheet.num_lic_owned }}</li>
-        <li>Owner: {{ sheet.owner.name }}</li>
+        <li>Owner: {% if sheet.owner %} {{ sheet.owner.name }} {% endif %}</li>
         <li>Source: {{ sheet.provider.name }}</li>
       </ul>
 </div>

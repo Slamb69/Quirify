@@ -5,16 +5,18 @@
 </head>
 
 {% block content %}
-<div> <h2>{{ piece.title }} ({{ piece.composer }})</h2><br>
+<div> <h2>{{ piece.title }}</h2>
   <ul style="list-style-type:none">
-    <li>Lyricist: {{ piece.lyricist }}</li>
-    <li>Genre: {% for genre in piece.genres %} {{ genre }} {% endfor %}</li>
+    <li>Composer: {{ piece.composer }}</li>
+    <li>Lyricist: {{ piece.lyricist | none_filter }}</li>
+    <li>Genre: {% for genre in piece.piece_genres %} 
+                {{ genre.genre.name }} {% endfor %}</li>
     <li>Publication Year: {{ piece.publication_year }}</li>
     <li>Number of voices: {{ piece.original_num_voices }}</li>
     <li>Original Voicing: {{ piece.original_voicing }}</li>
     <li>Original Language: {{ piece.original_language }}</li>
     <li>Instrumentation: {{ piece.original_language }}</li>
-    <li>Description: {{ piece.description }}</li>
+    <li>Description: {{ piece.description | none_filter }}</li>
   </ul>
 </div>
   {% if piece.sheets %}
@@ -27,14 +29,14 @@
   
   {% endif %}
     {% if piece.text_original %}
-    <div><h3>Original {{ sheet.original_language }} Text:</h3>
-      <div>{{ text_original }}</div>
+    <div><h3>Original {{ piece.original_language }} Text:</h3>
+      <div>{{ piece.text_original }}</div>
     </div>
   {% endif %}
 
   {% if piece.text_english %}
     <div><h3>English Translation:</h3>
-      <div>{{ text_english }}</div>
+      <div>{{ piece.text_english }}</div>
     </div>
   {% endif %}
 

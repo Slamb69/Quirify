@@ -32,6 +32,18 @@ app.jinja_env.undefined = StrictUndefined
 app.jinja_env.auto_reload = True
 
 
+
+
+@app.template_filter()
+def none_filter(value):
+    if value is None:
+        return ''
+    else:
+        return value
+
+app.jinja_env.filters['none_filter'] = none_filter
+
+
 @app.route('/')
 def index():
     """Homepage."""
@@ -51,7 +63,7 @@ def register_process():
     """Process registration."""
 
     # Get form variables
-    email = request.form.get("email")
+    email = request.form.get("email").lower()
     password = request.form.get("password")
     fname = request.form.get("fname")
     lname = request.form.get("lname")
@@ -151,12 +163,12 @@ def search_cpdl():
 def search_cpdl_page():
     """Search CPDL.org choralwiki for a specific PIECE's page."""
 
-    value = request.args.get("page_id")
+    page_id = request.args.get("page_id")
 
-    piece = Piece.query.filter_by(page_id=value).first()
+    piece = Piece.query.filter_by(page_id=page_id).first()
 
     if not piece:
-        payload = {'pageid': value}
+        payload = {'pageid': page_id}
 
         # cpdl_search = 'http://www1.cpdl.org/wiki/api.php?action=parse&format=json&pageid=3788'
 
@@ -164,14 +176,11 @@ def search_cpdl_page():
 
         results = r1.json()
 
-        page_data = parse_page_results(results, value)
+        piece_id = parse_page_results(results, page_id)
 
-        # be sure to make piece = result from dbase for new piece_id!!!!!
+        piece = Piece.query.filter_by(piece_id=piece_id).first()
 
-
-    
-
-    # return redirect("/pieces/%s" % piece=piece)
+    return redirect("/pieces/%s" % piece.piece_id)
 
 
 @app.route("/users/<int:user_id>")

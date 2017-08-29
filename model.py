@@ -229,7 +229,7 @@ class Piece(db.Model):
     original_instrumentation = db.Column(db.String(248))
     text_original = db.Column(db.String(2048))
     text_english = db.Column(db.String(2048))
-    description = (db.String(2048))
+    description = db.Column(db.String(2048))
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
