@@ -5,11 +5,11 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, request, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import (User, Concert, Event, Instrument, Owner, PerformanceGroup,
-                   Performer, Piece, AudioFile, Provider, Setlist, SheetMusic,
-                   Roster, PerformerInstrument, Assignment, AssignedSet, Genre,
-                   PieceGenre, UserPiece, UserSheet, UserAudioFile,
-                   connect_to_db, db)
+from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
+                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider, Setlist,
+                   PerformerInstrument, Assignment, EventAssignment, Genre,
+                   PieceGenre, SheetMusicProvider, UserPiece, UserSheet,
+                   UserAudioFile, SheetMusicOwner, connect_to_db, db)
 
 from helper_functions import (parse_search_results, parse_page_results)
 

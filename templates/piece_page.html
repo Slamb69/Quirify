@@ -7,36 +7,40 @@
 {% block content %}
 <div> <h2>{{ piece.title }}</h2>
   <ul style="list-style-type:none">
+    <li>Title: {{ piece.title }}</li>
     <li>Composer: {{ piece.composer }}</li>
-    <li>Lyricist: {{ piece.lyricist | none_filter }}</li>
+    <li>Lyricist: {{ piece.lyricist|none_filter }}</li>
     <li>Genre: {% for genre in piece.piece_genres %} 
                 {{ genre.genre.name }} {% endfor %}</li>
-    <li>Publication Year: {{ piece.publication_year }}</li>
-    <li>Number of voices: {{ piece.original_num_voices }}</li>
-    <li>Original Voicing: {{ piece.original_voicing }}</li>
-    <li>Original Language: {{ piece.original_language }}</li>
-    <li>Instrumentation: {{ piece.original_language }}</li>
-    <li>Description: {{ piece.description | none_filter }}</li>
+    <li>Publication Year: {{ piece.publication_year|none_filter }}</li>
+    <li>Number of voices: {{ piece.original_num_voices|none_filter }}</li>
+    <li>Original Voicing: {{ piece.original_voicing|none_filter }}</li>
+    <li>Original Language: {{ piece.original_language|none_filter }}</li>
+    <li>Instrumentation: {{ piece.original_language|none_filter }}</li>
+    <li>Description: {{ piece.description|none_filter }}</li>
+    <li>CPDL Page: {{ piece.page_id }}</li>
+
   </ul>
 </div>
   {% if piece.sheets %}
     <div><h3>Sheet music versions:</h3>
       <ul style="list-style-type:none">{% for sheet in piece.sheets %}
-        <li><a href="/sheets/{{ sheet.sheet_id }}">#{{ sheet.sheet_id }}:
-          {{ sheet.piece.title }} ({{ sheet.edition_notes }})</a></li>
+        <li><a href="/sheets/{{ sheet.sheet_id }}">{{ sheet.edition_notes }}
+          (ID #:{{ sheet.sheet_id }})
+           </a></li>
       {% endfor %}</ul>
     </div>
   
   {% endif %}
     {% if piece.text_original %}
     <div><h3>Original {{ piece.original_language }} Text:</h3>
-      <div>{{ piece.text_original }}</div>
+      <div>{{ piece.text_original|safe }}</div>
     </div>
   {% endif %}
 
   {% if piece.text_english %}
     <div><h3>English Translation:</h3>
-      <div>{{ piece.text_english }}</div>
+      <div>{{ piece.text_english|safe }}</div>
     </div>
   {% endif %}
 

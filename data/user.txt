@@ -1,2 +1,2 @@
-Me1, Mememe1, Me1@me.com, 1234, Mini1, 415-555-1212
-Me2, Mememe2, Me2@me.com, 2234, Mini2, 425-555-2222
+Me1, Mememe1, me1@me.com, 1234, Mini1, 415-555-1212
+Me2, Mememe2, me2@me.com, 2234, Mini2, 425-555-2222

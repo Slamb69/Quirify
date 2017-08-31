@@ -1,4 +1,11 @@
-RR, Revels Roses, Really cool SSAA(T) group 1, , 02/07/2001
-RSND, Resound Ensemble, Really cool SATB group 2, , 02/07/2002
-TV, Treble Voices, Really cool SSAA group, 08/12/2010, 03/07/2003
-CV, Cathedral Voices, Awesome SATB group, , 03/03/2004
+RR, 1
+RR, 2
+RR, 3
+RR, 4
+RSND, 1
+RSND, 2
+RSND, 3
+RSND, 4
+RSND, 5
+RSND, 6
+RR Quartet, 1 

@@ -5,36 +5,37 @@
 </head>
 
 {% block content %}
-<div> <a href="{{ sheet.music_url }}" target="_blank"><h2>{{ sheet.piece.title }} 
+<div> <h2>Sheet music PDF:<br/>
+    <a href="{{ sheet.music_url }}" target="_blank" rel="nofollow" download>{{ sheet.piece.title }} 
        ({% if sheet.voicing %}{{ sheet.voicing }}
-          {% else %}{{ sheet.piece.original_voicing }}
+          {% else %}{{ sheet.piece.original_voicing|none_filter }}
           {% endif %}
         {% if sheet.key %}, {{ sheet.key }}{% endif %})</h2></a>
   {% if sheet.edition_notes %}
-    <h3>Edition notes: {{ sheet.edition_notes}}</h3>
+    <h3>Edition notes: {{ sheet.edition_notes }}</h3>
   {% endif %}
       <ul>
-        <li>Editor: {{ sheet.editor }}</li>
-        <li>Arranger: {{ sheet.arranger }}</li>
-        <li>Instrumentation: {{ sheet.instrumentation }}</li>
-        <li>Language: {{ sheet.language }}</li>
+        <li>Editor: {{ sheet.editor|none_filter }}</li>
+        <li>Arranger: {{ sheet.arranger|none_filter }}</li>
+        <li>Instrumentation: {{ sheet.instrumentation|none_filter }}</li>
+        <li>Language: {{ sheet.language|none_filter }}</li>
         {% if sheet.alt_language %}<li>Alternate language: {{ sheet.alt_language }}</li>
         {% endif %}
-        <li>Time Signature: {{ sheet.time_signature }}</li>
-        <li>Tempo: {{ sheet.tempo | none_filter }}</li>
-        <li>Score Type: {{ sheet.score_type }}</li>
-        <li>License Type: {{ sheet.license_type }}</li>
-        <li>Licenses owned: {{ sheet.num_lic_owned }}</li>
+        <li>Time Signature: {{ sheet.time_signature|none_filter }}</li>
+        <li>Tempo: {{ sheet.tempo|none_filter }}</li>
+        <li>Score Type: {{ sheet.score_type|none_filter }}</li>
+        <li>License Type: {{ sheet.license_type|none_filter }}</li>
+        <li>Licenses owned: {{ sheet.num_lic_owned|none_filter }}</li>
         <li>Owner: {% if sheet.owner %} {{ sheet.owner.name }} {% endif %}</li>
         <li>Source: {{ sheet.provider.name }}</li>
       </ul>
 </div>
   {% if sheet.audiofiles %}
-  <h3>Associated Files:</h3>
+  <h3>Download Associated Files:</h3>
       {% for aud in sheet.audiofiles %}
       <ul style="list-style-type:none"> 
-        <li><a href="{{ aud.url }}" download>{{ aud.file_type }} 
-          ({{ aud.voicing_details }})</a>
+        <li><a href="{{ aud.url }}" download>.{{ aud.file_type }} File
+          {% if aud.voicing_details %} ({{ aud.voicing_details }}) {% endif %}</a>
         </li>
       </ul>
       {% endfor %}

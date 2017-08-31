@@ -1,4 +1,0 @@
-RR, 3, Roses Summer 2017 Roster
-RR, 1, Roses Summer 2017 Roster
-RSND, 5, Resound Fall 2017 Roster
-RSND, 1, Resound Spring 2017 Roster

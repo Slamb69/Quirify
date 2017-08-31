@@ -1,1 +1,3 @@
-Ecco Mormorar L'onde, 3788, secular madrigal, Claudio Monteverdi, Torquato Tasso, 1590, SSATB, F, Italian
+Ecco Mormorar L'onde, 3788, Claudio Monteverdi, Torquato Tasso, 1590, 5, SSATB, Italian, A cappella, italian text here, english text here, description here awesome piece
+Ave maria, 4144, Claudio Monteverdi, , 1582, 3, SAT or TTB, Latin, A cappella, , , description here no texts on this page
+El Grillo, 11111, Josquin des Prez, , 1505, 4, SATB, Italian, A cappella, Italian text here, english text here, Very popular madrigal!

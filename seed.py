@@ -3,11 +3,12 @@
 import datetime
 # from sqlalchemy import func
 
-from model import (User, Concert, Event, Instrument, Owner, PerformanceGroup,
-                   Performer, Piece, AudioFile, Provider, Setlist, SheetMusic,
-                   Roster, PerformerInstrument, Assignment, AssignedSet, Genre,
-                   PieceGenre, UserPiece, UserSheet, UserAudioFile,
-                   connect_to_db, db)
+from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
+                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider, Setlist,
+                   PerformerInstrument, Assignment, EventAssignment, Genre,
+                   PieceGenre, SheetMusicProvider, UserPiece, UserSheet,
+                   UserAudioFile, SheetMusicOwner, connect_to_db, db)
+
 from server import app
 
 
@@ -33,15 +34,15 @@ def load_users():
     db.session.commit()
 
 
-def load_performance_groups():
-    """Load performance groups from perfgroup.txt into database."""
+def load_groups():
+    """Load groups from group.txt into database."""
 
-    print "Performance Groups"
+    print "Groups"
 
-    for i, row in enumerate(open("data/perfgroup.txt")):
+    for i, row in enumerate(open("data/group.txt")):
         row = row.rstrip()
 
-        perf_group_code, name, description, end, start = row.split(", ")
+        group_code, name, description, end, start = row.split(", ")
 
         start_date = datetime.datetime.strptime(start, "%m/%d/%Y")
 
@@ -50,14 +51,14 @@ def load_performance_groups():
         else:
             end_date = None
 
-        perfgroup = PerformanceGroup(perf_group_code=perf_group_code,
-                                     name=name,
-                                     description=description,
-                                     start_date=start_date,
-                                     end_date=end_date)
+        group = Group(group_code=group_code,
+                      name=name,
+                      description=description,
+                      start_date=start_date,
+                      end_date=end_date)
 
         # Add to the session.
-        db.session.add(perfgroup)
+        db.session.add(group)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -162,22 +163,21 @@ def load_performer_instruments():
     db.session.commit()
 
 
-def load_rosters():
-    """Load rosters from roster.txt into database."""
+def load_performer_groups():
+    """Load performer groups from perfgroup.txt into database."""
 
-    print "Rosters"
+    print "Performer Group"
 
-    for i, row in enumerate(open("data/roster.txt")):
+    for i, row in enumerate(open("data/perfgroup.txt")):
         row = row.rstrip()
 
-        perf_group_code, performer_id, name = row.split(", ")
+        group_code, performer_id = row.split(", ")
 
-        roster = Roster(perf_group_code=perf_group_code,
-                        performer_id=performer_id,
-                        name=name)
+        performer_group = PerformerGroup(group_code=group_code,
+                                         performer_id=performer_id)
 
         # Add to the session.
-        db.session.add(roster)
+        db.session.add(performer_group)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -208,16 +208,20 @@ def load_pieces():
     for i, row in enumerate(open("data/piece.txt")):
         row = row.rstrip()
 
-        title, pg_id, comp, lyric, pub_yr, ovoice, okey, lang = row.split(", ")
+        title, pg_id, comp, lyr, pub_yr, onv, ov, lang, oi, to, te, d = row.split(", ")
 
         piece = Piece(title=title,
                       page_id=pg_id,
                       composer=comp,
-                      lyricist=lyric,
+                      lyricist=lyr,
                       publication_year=pub_yr,
-                      original_voicing=ovoice,
-                      original_key=okey,
-                      original_language=lang)
+                      original_num_voices=onv,
+                      original_voicing=ov,
+                      original_language=lang,
+                      original_instrumentation=oi,
+                      text_original=to,
+                      text_english=te,
+                      description=d)
 
         # Add to the session.
         db.session.add(piece)
@@ -234,23 +238,20 @@ def load_sheets():
     for i, row in enumerate(open("data/sheet.txt")):
         row = row.rstrip()
 
-        (pid, oid, prid, url, cpdl, ed, vc, inst,
-         lang, key, time, scr, lic, ver_desc) = row.split(", ")
+        (pid, url, cpdl, ed, edn, vc, inst, lang, key, time, scr, lic) = row.split(", ")
 
         sheet = SheetMusic(piece_id=pid,
-                           owner_id=oid,
-                           provider_id=prid,
                            music_url=url,
                            cpdl_num=cpdl,
                            editor=ed,
+                           edition_notes=edn,
                            voicing=vc,
                            instrumentation=inst,
                            language=lang,
                            key=key,
                            time_signature=time,
                            score_type=scr,
-                           license_type=lic,
-                           version_description=ver_desc)
+                           license_type=lic)
 
         # Add to the session.
         db.session.add(sheet)
@@ -298,62 +299,21 @@ def load_genres():
     db.session.commit()
 
 
-def load_assignments():
-    """Load assignments from assignment.txt into database."""
+def load_piecegenres():
+    """Load piece-genres from piecegenre.txt into database."""
 
-    print "Assignments"
+    print "Piece-genres"
 
-    for i, row in enumerate(open("data/assignment.txt")):
+    for i, row in enumerate(open("data/piecegenre.txt")):
         row = row.rstrip()
 
-        sheet_id, roster_id, pi_id = row.split(", ")
+        genre_id, piece_id = row.split(", ")
 
-        assignment = Assignment(sheet_id=sheet_id,
-                                roster_id=roster_id,
-                                pi_id=pi_id)
-
-        # Add to the session.
-        db.session.add(assignment)
-
-    # Commit the session/data to the dbase.
-    db.session.commit()
-
-
-def load_setlists():
-    """Load setlists from setlist.txt into database."""
-
-    print "Setlists"
-
-    for i, row in enumerate(open("data/setlist.txt")):
-        row = row.rstrip()
-
-        name, notes = row.split("| ")
-
-        setlist = Setlist(name=name,
-                          notes=notes)
+        piecegenre = PieceGenre(genre_id=genre_id,
+                                piece_id=piece_id)
 
         # Add to the session.
-        db.session.add(setlist)
-
-    # Commit the session/data to the dbase.
-    db.session.commit()
-
-
-def load_assigned_sets():
-    """Load setlists from setlist.txt into database."""
-
-    print "Assigned Sets"
-
-    for i, row in enumerate(open("data/assignset.txt")):
-        row = row.rstrip()
-
-        assignment_id, setlist_id = row.split(", ")
-
-        assignset = AssignedSet(assignment_id=assignment_id,
-                                setlist_id=setlist_id)
-
-        # Add to the session.
-        db.session.add(assignset)
+        db.session.add(piecegenre)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -380,6 +340,27 @@ def load_concerts():
     db.session.commit()
 
 
+def load_setlists():
+    """Load setlists from setlist.txt into database."""
+
+    print "Setlists"
+
+    for i, row in enumerate(open("data/setlist.txt")):
+        row = row.rstrip()
+
+        sheet_id, concert_id, sheet_finalized = row.split("| ")
+
+        setlist = Setlist(sheet_id=sheet_id,
+                          concert_id=concert_id,
+                          sheet_finalized=sheet_finalized)
+
+        # Add to the session.
+        db.session.add(setlist)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
 def load_events():
     """Load events from event.txt into database."""
 
@@ -388,20 +369,101 @@ def load_events():
     for i, row in enumerate(open("data/event.txt")):
         row = row.rstrip()
 
-        concert_id, setlist_id, name, location, start, end = row.split(", ")
+        concert_id, name, location, start, end, logistics = row.split("| ")
 
         start_day_time = datetime.datetime.strptime(start, "%b-%d-%Y-%H:%M")
         end_day_time = datetime.datetime.strptime(end, "%b-%d-%Y-%H:%M")
 
         event = Event(concert_id=concert_id,
-                      setlist_id=setlist_id,
                       name=name,
                       location=location,
                       start_day_time=start_day_time,
-                      end_day_time=end_day_time)
+                      end_day_time=end_day_time,
+                      event_logistics=logistics)
 
         # Add to the session.
         db.session.add(event)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_assignments():
+    """Load assignments from assignment.txt into database."""
+
+    print "Assignments"
+
+    for i, row in enumerate(open("data/assignment.txt")):
+        row = row.rstrip()
+
+        sheet_id, pi_id = row.split(", ")
+
+        assignment = Assignment(sheet_id=sheet_id,
+                                pi_id=pi_id)
+
+        # Add to the session.
+        db.session.add(assignment)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_event_assignments():
+    """Load event assignments from evtassign.txt into database."""
+
+    print "Event Assignments"
+
+    for i, row in enumerate(open("data/evtassign.txt")):
+        row = row.rstrip()
+
+        assignment_id, event_id, notes = row.split("|")
+
+        evtassign = EventAssignment(assignment_id=assignment_id,
+                                    event_id=event_id,
+                                    notes=notes)
+
+        # Add to the session.
+        db.session.add(evtassign)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_sheet_providers():
+    """Load sheet music providers from sheetprovider.txt into database."""
+
+    print "Sheet Providers"
+
+    for i, row in enumerate(open("data/sheetprovider.txt")):
+        row = row.rstrip()
+
+        sheet_id, provider_id = row.split(", ")
+
+        sheetprovider = SheetMusicProvider(sheet_id=sheet_id,
+                                           provider_id=provider_id)
+
+        # Add to the session.
+        db.session.add(sheetprovider)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_sheet_owners():
+    """Load sheet music owners from sheetowner.txt into database."""
+
+    print "Sheet Owners"
+
+    for i, row in enumerate(open("data/sheetowner.txt")):
+        row = row.rstrip()
+
+        sheet_id, owner_id = row.split(", ")
+
+        sheetowner = SheetMusicOwner(sheet_id=sheet_id,
+                                     owner_id=owner_id)
+
+        # Add to the session.
+        db.session.add(sheetowner)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -420,27 +482,29 @@ def load_events():
 #     db.session.execute(query, {'new_id': max_id + 1})
 #     db.session.commit()
 
-
 if __name__ == "__main__":
     connect_to_db(app)
     db.create_all()
 
     load_users()
-    load_performance_groups()
+    load_groups()
     load_owners()
     load_performers()
     load_instruments()
     load_performer_instruments()
-    load_rosters()
+    load_performer_groups()
     load_providers()
     load_pieces()
     load_sheets()
     load_audiofiles()
     load_genres()
-    load_assignments()
-    load_setlists()
-    load_assigned_sets()
+    load_piecegenres()
     load_concerts()
+    load_setlists()
     load_events()
+    load_assignments()
+    load_event_assignments()
+    load_sheet_providers()
+    load_sheet_owners()
 
     # set_val_user_id()
