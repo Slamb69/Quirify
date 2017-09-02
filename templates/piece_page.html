@@ -5,7 +5,15 @@
 </head>
 
 {% block content %}
-<div> <h2>{{ piece.title }}</h2>
+<div> 
+  <h2>{{ piece.title }}
+    {% if piece.is_users_piece(session.get('user_id')) %}
+      <button id="del_upiece" name="upiecedel" class="db_delbtn">Remove from Library</button>
+    {% else %}
+      <button id="add_upiece" name="upieceadd" class="db_addbtn">Add to Library</button>
+    {% endif %}
+  </h2>
+
   <ul style="list-style-type:none">
     <li>Title: {{ piece.title }}</li>
     <li>Composer: {{ piece.composer }}</li>

@@ -32,8 +32,7 @@ app.jinja_env.undefined = StrictUndefined
 app.jinja_env.auto_reload = True
 
 
-
-
+# Added a jinja filter so that "None" doesn't display in browser if a field is Null.
 @app.template_filter()
 def none_filter(value):
     if value is None:
@@ -43,6 +42,7 @@ def none_filter(value):
 
 app.jinja_env.filters['none_filter'] = none_filter
 
+#############
 
 @app.route('/')
 def index():
@@ -104,18 +104,18 @@ def login_process():
     """Process login."""
 
     # Get form variables
-    email = request.form["email"]
+    email = request.form["email"].lower()
     password = request.form["password"]
 
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        flash("No such user - please correct the email, or register.")
-        return redirect("/register") # NOTE = currently reg/login on SAME page
+        flash("No such user - please correct the email, or register")
+        return redirect("/register")    # NOTE = currently reg/login on SAME page
 
     if user.password != password:
-        flash("Incorrect password.")
-        return redirect("/register") # NOTE = currently reg/login on SAME page
+        flash("Incorrect password")
+        return redirect("/register")    # NOTE = currently reg/login on SAME page
 
     session["user_id"] = user.user_id
 
@@ -131,6 +131,18 @@ def logout():
     del session["user_id"]
     flash("Logged Out.")
     return redirect("/")
+
+
+@app.route('/user_home')
+def user_home():
+    """Go to User's homepage."""
+
+    if session.get("user_id"):
+        user_id = session.get("user_id")
+        return redirect("/users/%s" % user_id)
+    else:
+        flash("Please login or register to get started")
+        return redirect("/register")
 
 
 @app.route("/search")
@@ -192,21 +204,30 @@ def user_detail(user_id):
     return render_template("user.html", user=user)
 
 
-@app.route("/pieces_list")
-def pieces_list():
-    """Show list of pieces."""
+@app.route("/library")
+def library():
+    """Show user's library (Piece, Sheet, AudioFile)."""
 
-    pieces = Piece.query.order_by('title').all()
+    user = session.get("user_id")
 
-    return render_template("pieces_list.html", pieces=pieces)
+    userpieces = UserPiece.query.filter_by(user_id=user).all()
+
+    usersheets = UserSheet.query.filter_by(user_id=user).all()
+
+    userfiles = UserAudioFile.query.filter_by(user_id=user).all()
+
+    return render_template("library.html",
+                           user=user,
+                           userpieces=userpieces,
+                           usersheets=usersheets,
+                           userfiles=userfiles)
 
 
+############## ROUTES TO DISPLAY INDIVIDUAL ITEM PAGE BY ID ####################
 @app.route("/pieces/<int:piece_id>", methods=['GET'])
 def piece_detail(piece_id):
     """Show logged in user info about a piece. allow them to choose a specific
     sheet music version of the piece, if any are available."""
-
-    user_id = session.get("user_id")
 
     piece = Piece.query.get(piece_id)
 
@@ -219,11 +240,44 @@ def sheet_detail(sheet_id):
        files. Allow them to assign parts to performers and/or add the sheet
        to a setlist."""
 
-    user_id = session.get("user_id")
-
     sheet = SheetMusic.query.get(sheet_id)
 
     return render_template("sheet_page.html", sheet=sheet)
+
+
+@app.route("/concerts/<int:concert_id>", methods=['GET'])
+def concert_page(concert_id):
+    """Show logged in user info about a concert."""
+
+    concert = Concert.query.get(concert_id)
+
+    setlists = Setlist.query.filter_by(concert_id=concert_id).all()
+
+    return render_template("concert_page.html", concert=concert, setlists=setlists)
+
+
+@app.route("/events/<int:event_id>", methods=['GET'])
+def event_page(event_id):
+    """Show logged in user info about a concert."""
+
+    event = Event.query.get(event_id)
+
+    return render_template("event_page.html", event=event)
+
+
+@app.route("/groups/<int:group_id>", methods=['GET'])
+def group_page(group_id):
+    """Show logged in user info about a concert."""
+
+    group = Group.query.get(group_id)
+
+    performers = Performer.query.filter_by(group_id=group_id).all()
+
+    return render_template("group_page.html", group=group, performers=performers)
+
+
+##########  ROUTES TO ADD TO LIBRARY ######################################
+
 
 
 

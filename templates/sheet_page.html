@@ -5,12 +5,23 @@
 </head>
 
 {% block content %}
-<div> <h2>Sheet music PDF:<br/>
-    <a href="{{ sheet.music_url }}" target="_blank" rel="nofollow" download>{{ sheet.piece.title }} 
-       ({% if sheet.voicing %}{{ sheet.voicing }}
-          {% else %}{{ sheet.piece.original_voicing|none_filter }}
-          {% endif %}
-        {% if sheet.key %}, {{ sheet.key }}{% endif %})</h2></a>
+<div> 
+  <h2>Sheet music PDF:<br/>
+    <a href="{{ sheet.music_url }}" target="_blank" rel="nofollow" download>
+      {{ sheet.piece.title }} 
+        ({% if sheet.voicing %}
+          {{ sheet.voicing }}
+        {% else %}
+          {{ sheet.piece.original_voicing|none_filter }}
+        {% endif %}{% if sheet.key %}, 
+          {{ sheet.key }}
+        {% endif %})</a>
+      {% if sheet.is_users_sheet(session.get('user_id')) %}
+        <button id="del_usheet" name="usheetdel" class="db_delbtn">Remove from Library</button>
+      {% else %}
+        <button id="add_usheet" name="usheetadd" class="db_addbtn">Add to Library</button>
+      {% endif %}</h2>
+
   {% if sheet.edition_notes %}
     <h3>Edition notes: {{ sheet.edition_notes }}</h3>
   {% endif %}
@@ -26,8 +37,10 @@
         <li>Score Type: {{ sheet.score_type|none_filter }}</li>
         <li>License Type: {{ sheet.license_type|none_filter }}</li>
         <li>Licenses owned: {{ sheet.num_lic_owned|none_filter }}</li>
-        <li>Owner: {% if sheet.owner %} {{ sheet.owner.name }} {% endif %}</li>
-        <li>Source: {{ sheet.provider.name }}</li>
+        <li>Owner: {% for owner in sheet.sheet_owners %}
+                   {{ owner.owner.name|none_filter }}{% endfor %}</li>
+        <li>Source: {% for provider in sheet.sheet_providers %}
+                    {{ provider.provider.name|none_filter }}{% endfor %}</li>
       </ul>
 </div>
   {% if sheet.audiofiles %}
@@ -35,7 +48,14 @@
       {% for aud in sheet.audiofiles %}
       <ul style="list-style-type:none"> 
         <li><a href="{{ aud.url }}" download>.{{ aud.file_type }} File
-          {% if aud.voicing_details %} ({{ aud.voicing_details }}) {% endif %}</a>
+          {% if aud.voicing_details %} ({{ aud.voicing_details }})</a>&nbsp; 
+            
+            {% if sheet.is_users_sheet(session.get('user_id')) %}
+              <button id="del_usheet" name="usheetdel" class="db_delbtn">Remove from Library</button>
+            {% else %}
+              <button id="add_usheet" name="usheetadd" class="db_addbtn">Add to Library</button>
+            {% endif %}
+          {% endif %}
         </li>
       </ul>
       {% endfor %}

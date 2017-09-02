@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}My Library{% endblock%}</title>
+</head>
+
+{% block content %}
+<h1 class="title" id="library_title">My Library</h1>
+<div id="pieces_list">
+<h2 class="subtitle" id="pieces_title">My Saved Pieces</h2>  
+  {% if userpieces %}
+    <ul>
+      {% for upiece in userpieces %}
+        <li>
+          <a href="/pieces/{{ upiece.piece_id }}">
+            {{ upiece.piece.title }} ({{ upiece.piece.composer }})
+          </a>
+          {% if upiece.user.usersheets %}
+            <ul>
+              {% for usheet in piece.user.usersheets %}
+                <li><a href="{{ usheet.music_url }}">
+                  {{ usheet.sheet.edition_notes }}
+                </a>
+                  {% if usheet.user.userfiles %}
+                  <ul>
+                    {% for ufile in sheet.user.userfiles %}
+                      <li><a href="{{ ufile.url }}">
+                        {{ ufile.file_type }}, {{ ufile.voicing_details }}
+                      </a>
+                    </li>
+                    {% endfor %}
+                  </ul> 
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul> 
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>  
+{% endblock %}

@@ -221,6 +221,19 @@ class Piece(db.Model):
     text_english = db.Column(db.String(2048))
     description = db.Column(db.String(2048))
 
+    # Function to check whether a piece is in the session user's library.
+    def is_users_piece(self, user_id):
+        """checks if a user is associated with this piece."""
+
+        is_found = False
+
+        for upiece in self.user_pieces:
+            if upiece.user_id == user_id:
+                is_found = True
+
+        return is_found
+
+
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
@@ -263,6 +276,18 @@ class SheetMusic(db.Model):
     # Define a relationship w/Piece class via piece_id foreign key.
     piece = db.relationship('Piece', backref='sheets')
 
+    # Function to check whether a sheet is in the session user's library.
+    def is_users_sheet(self, user_id):
+        """checks if a user is associated with this sheet."""
+
+        is_found = False
+
+        for usheet in self.user_sheets:
+            if usheet.user_id == user_id:
+                is_found = True
+
+        return is_found
+
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
@@ -289,6 +314,18 @@ class AudioFile(db.Model):
 
     # Define a relationship w/Sheet class via sheet_id foreign key.
     sheet = db.relationship('SheetMusic', backref='audiofiles')
+
+    # Function to check whether a file is in the session user's library.
+    def is_users_file(self, user_id):
+        """checks if a user is associated with this file."""
+
+        is_found = False
+
+        for ufile in self.user_files:
+            if ufile.user_id == user_id:
+                is_found = True
+
+        return is_found
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -546,7 +583,7 @@ class SheetMusicOwner(db.Model):
     def __repr__(self):
         """Print more useful info."""
         return ("<Sheet Owner id=%d, sheet_id=%d, owner_id=%d>" %
-                (self.shtprov_id, self.sheet.sheet_id, self.owner.owner_id))
+                (self.shtowner_id, self.sheet.sheet_id, self.owner.owner_id))
 
 ################# ASSOCIATION TABLES FOR SAVING TO USER ####################
 

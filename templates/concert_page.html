@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}{{ concert.name }}{% endblock%}</title>
+</head>
+
+{% block content %}
+<div> 
+  <h2>{{ concert.name }} Setlist:</h2>
+    <ul style="list-style-type:none">
+      {% if concert.setlists %}
+        {% for setlist in concert.setlists %}
+          <li>{{ setlist.sheet.piece.title }}</li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+</div>
+
+<div>
+  <h2>Concert Dates:</h2>
+  <ul style="list-style-type:none">
+    {% if concert.events %}
+      {% for event in concert.events %}
+        <li> Event Name: {{ event.name }}</li>
+        <li> Date, Time (to be unpacked): {{ event.start_day_time }}, 
+                                          {{ event.end_day_time }}</li>
+        <li> Location: {{ event.location }}</li><br>
+      {% endfor %}
+    {% endif %}
+  </ul>
+</div>
+{% endblock %}

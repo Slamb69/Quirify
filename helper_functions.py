@@ -48,20 +48,20 @@ def parse_page_results(results, pg_id):
     soup = BeautifulSoup(page_txt, "lxml")
 
     # Abbreviated variables for brevity to pass into the function!
-    ol = None # original_language
-    to = None # text_original
-    te = None # text_english
-    lrc = None # lyricist
-    onv = None # original_num_voices
-    ov = None # original_voicing
-    genre = None
-    oi = None # original instrumentation
-    desc = None # description
+    ol = None       # original_language
+    to = None       # text_original
+    te = None       # text_english
+    comp = 'Composer required'     # composer (not nullable!)
+    lrc = None      # lyricist
+    onv = None      # original_num_voices
+    ov = None       # original_voicing
+    # genre = None
+    oi = None       # original instrumentation
+    desc = None     # description
     genres = []
-    editors = []
-    ed_notes = [] # edition_notes
-    copyrights = []
-
+    # editors = []
+    # ed_notes = [] # edition_notes
+    # copyrights = []
 
     # Get general info about the piece for PIECE table & GENRE table:
     for b_tag in soup('b'):
@@ -76,25 +76,14 @@ def parse_page_results(results, pg_id):
             ov = b_tag.parent.get_text().split(":")[2].split("Genre")[0]
     ## GENRE IS A LIST, need to iterate & add each individually to GENRE table.
         if "Genre:" in b_tag.contents:
-            genres = map(lambda x: x.string, b_tag.parent('a')[1:])
+            cats = b_tag.parent.get_text().strip().split("Genre:")[-1]
+            genres = cats.split(",")
         if "Language:" in b_tag.contents:
             ol = b_tag.next_element.next_element.next_element.string
         if "Instruments:" in b_tag.contents:
             oi = b_tag.next_element.next_element.next_element.string
         if "Description:" in b_tag.contents:
             desc = b_tag.parent.get_text().replace("Description: ", '')
-    # ## Editors IS A LIST, need to iterate & add each individually to SHEET table.
-    #     if "Editor:" in b_tag.contents:
-    #         editor = b_tag.next_element.next_element.next_element.string
-    #         editors.append(editor)
-    # ## Ed_notes IS A LIST, need to iterate & add each individually to SHEET table.
-    #     if "Edition notes:" in b_tag.contents:
-    #         ednote = b_tag.parent.get_text().replace("Edition notes: ", '')
-    #         ed_notes.append(ednote)
-    # ## Copyrights IS A LIST, need to iterate & add each individually to SHEET table.
-    #     if "Copyright:" in b_tag.contents:
-    #         copyright = b_tag.next_element.next_element.next_element.string
-    #         copyrights.append(copyright)
 
     # Get the year published for PIECE table.
     pb_yr = None
@@ -122,7 +111,7 @@ def parse_page_results(results, pg_id):
         # Check whether each genre already exists - if so, add id to list. If
         # not, create it and add the id.
         for name in genres:
-            if Genre.query.filter_by(name=name).first():
+            if db.session.query(Genre.name).filter_by(name=name).first():
                 genre_id = db.session.query(Genre.genre_id).filter_by(name=name).first()
                 genre_ids.append(genre_id)
             else:
@@ -142,129 +131,56 @@ def parse_page_results(results, pg_id):
     # all CPDL #s, file urls and edition info (for "Sheet" and "AudioFile" tables)
     # based on whether the page has <li> tags.
 
-    # CPDL-file tuples contain each cpdl number and the url for any files 
-    # associated with that CPDL number.
-    cpdl_file_tuples = []
-
-    # Edition info will be a list of the editor, copyright and edition notes
-    # (if any) for each edition (CPDL #), in order of CPDL #.
-    edition_info = []
+    # Cpdl numbers are the dictionary keys, and each edition's information will
+    # be the values: each pdf, [audiofile], [filetype], [url], editor, copyright,
+    # and edition notes associated with each CPDL number.
+    cpdl_dict = {}
 
     if soup('li'):
-        for cpdl in soup('li'):
-            for a in cpdl.b.parent('a'):
-                # Turns out there are both internal AND external pdf links, so
-                # checking the class and then either adding the cpdl info or not.
-                if 'internal' in a['class']:
-                    cpdl_file_tuples.append((cpdl.b.font.string, "http://www1.cpdl.org" + a['href']))
-                else:
-                    cpdl_file_tuples.append((cpdl.b.font.string, a['href']))
+        for i, cpdl in enumerate(soup('li')):
+            if cpdl.b.font:
+                cpdl_dict[i] = {'cpdl': cpdl.b.font.string,
+                                'files': []}
+                for a in cpdl.b.parent('a'):
+                    # Turns out there are both internal AND external pdf links, so
+                    # checking the class and then either adding the cpdl info or not.
+                    if 'internal' in a['class']:
+                        cpdl_dict[i]['files'].append((a['href'].split(".")[-1],
+                                                     "http://www1.cpdl.org" + a['href']))
+                    else:
+                        cpdl_dict[i]['files'].append((a['href'].split(".")[-1],
+                                                     a['href']))
 
-        # Since we know there were CPDL #s, grabbing the other info related to
-        # each edition of sheet music here, and adding to the edition_info list.
-        for i, dd in enumerate(soup('dd')):
-            edition_info.append((dd.get_text().split(":")[1].rstrip().split(" (")[0]).strip())
-            if not i % 2:
-                edition_info.append(dd.get_text().split(": ")[-1].strip())
+            # Since we know there were CPDL #s, grabbing the other info related to
+            # each edition of sheet music here, and adding to the edition_info list.
+            for i, dd in enumerate(soup('dd')):
+                # the text for each CPDL splits into 2 strings per CPDL #, so:
+                if not i % 2:
+                    # Editor, Copyright('lic') @ even "i", so (i/2) gives correct dict key #
+                    cpdl_dict[i/2]['editor'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
+                    cpdl_dict[i/2]['lic'] = dd.get_text().split(": ")[-1].strip()
+                if i % 2:
+                    #  Edition notes @ odd "i"s, so ((i - 1 )/ 2) gives correct dict key #
+                    cpdl_dict[(i-1)/2]['ednote'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
 
-    if cpdl_file_tuples:
-        
+        # Use cpdl_dict to add Sheet & Files to the database. IGNORE any CPDL #
+        # edition that does not have a PDF as the first file!!! (ie, directs to
+        # another website, or etc - only want the editions w/a PDF of the music.)
 
-    ######### OLD WAY - GETTING SHEET & AUDIOFILE TABLES DATA #####################
-
-    # # Get CPDL numbers for each piece's sheet music/files for SHEET and AudioFile
-    # # tables.
-    # # NB: CPDL # list correlates to may other lists (of items or dicts).
-    # #     Use this list to pull the correct index # or key for dbase entry!
-    # cpdl_nums = map(lambda x: x.string, soup('font'))
-
-    # # Get all the image files from the page, and cut out the first 2 items, we
-    # # then have all of the sheet music and audio files from the page.
-    # images = results['parse']['images']
-    # image_names = images[2:]
-
-    # ###### TESTING = TRYING TO GET ALL URLs IN ONE QUERY...BETTER/FASTER than
-    # # individual quesries for each file? ######
-
-    # # Make sure there are images - if not, return 'no files' message to user.
-    # if image_names != []:
-    #     # Create a number to assign each file to a group, in order, that will later
-    #     # correlate to the order of the CPDL #s list.
-    #     pdf_2_cpdl_index = 0
-    #     file_name_type_idx = [(images[pdf_2_cpdl_index], 'pdf', pdf_2_cpdl_index)]
-    #     # Since all records have the pdf first, then audio files, using pdf to
-    #     # split list of "images", AKA files!
-    #     for image in image_names[1:]:
-    #         if image.split('.')[-1] == 'pdf':
-    #             pdf_2_cpdl_index += 1
-    #             file_name_type_idx.append((image, 'pdf', pdf_2_cpdl_index))
-    #         else:
-    #             file_name_type_idx.append((image, str(image.split('.')[-1]), pdf_2_cpdl_index))
-
-    #     # Sort tuples list so it matches the order of the urls list, below.
-    #     files_sorted = sorted(file_name_type_idx)
-
-    #     # Format the list of images to be used in an API query.
-    #     imagelist = []
-
-    #     for image in image_names:
-    #         prep = "File:" + image
-    #         imagelist.append(prep)
-    #     # Sort the image files so the sorted results are in the same order, and
-    #     # can be associated later.
-    #     imagesort = sorted(imagelist)
-
-    #     filelist = "|".join(imagesort)
-
-    #     urls = get_urls(filelist, len(imagesort))
-
-    #     # All pieces being parsed in this way are CPDL, provider id (prid) 1.
-    #     provider_id = 1
-    #     sheet_ids = []
-
-    #     # files_sorted is a list of tuples. Each tuple contains 3 pieces of file
-    #     # info:
-    #     #   @ file_info[0] = filename (in same order and number as in the url list),
-    #     #   @ file_info[1] = type of file,
-    #     #   @ file_info[2] = cpdl list index # - also the index for related "short"
-    #     #                    lists that have one piece of data per cpdl #, such as
-    #     #                    editor, edition & license (copyright) info.
-    #     # First, pulling all PDFs - each pdf contains the SHEET of sheet music.
-    #     # Adding each Sheet to the dbase here, and collecting the sheet_ids as
-    #     # a list.
-    #     for i, file_info in enumerate(files_sorted):
-    #         if file_info[1] == 'pdf':
-    #             url = urls[i]
-    #             cpdl = cpdl_nums[file_info[2]]
-    #             ed = editors[file_info[2]]
-    #             ednote = ed_notes[file_info[2]]
-    #             lic = copyrights[file_info[2]]
-    #             sheet_id = add_sheet(piece_id,
-    #                                  prid,
-    #                                  url,
-    #                                  cpdl,
-    #                                  ed,
-    #                                  ednote,
-    #                                  lic)
-    #             sheet_ids.append((file_info[2], sheet_id))
-
-    #     # Sort sheet ids by cpdl index number, to be sure that the non-pdf files
-    #     # are each associated with the correct piece of sheet music. Each audio
-    #     # file is connected to its specific Sheet using the sheet_ids list (a
-    #     # sheet can have 0 or more associated files).
-
-    #     sheet_ids_sorted = sorted(sheet_ids)
-
-    #     file_ids = []
-
-    #     for i, file_info in enumerate(files_sorted):
-    #         if not file_info[1] == 'pdf':
-    #             sheet_id = sheet_ids_sorted[file_info[2]][1]
-    #             url = urls[i]
-    #             file_type = file_info[1]
-
-    #             file_id = add_file(sheet_id, file_type, url)
-    #             file_ids.append(file_id)
+            for i, edition in enumerate(cpdl_dict):
+                if cpdl_dict[i]['url'][0][0] == 'pdf':
+                    sheet_id = add_sheet(piece_id,
+                                         cpdl_dict[i]['url'][0][1],
+                                         cpdl_dict[i]['cpdl'],
+                                         cpdl_dict[i]['editor'],
+                                         cpdl_dict[i]['ednote'],
+                                         cpdl_dict[i]['lic'])
+                    # Add the files for each sheet, if any.
+                    if cpdl_dict[i]['files'][1:]:
+                        for j, fle in cpdl_dict[i]['files'][1:]:
+                            add_file(sheet_id,
+                                     cpdl_dict[i]['files'][j][0],
+                                     cpdl_dict[i]['files'][j][1])
 
     return piece_id
 
@@ -368,7 +284,7 @@ def add_sheet(pid, url, cpdl, ed, ednote, lic):
 
 
 def add_file(sheet_id, file_type, url):
-    """Adds a file to the database."""
+    """Adds an AudioFile to the database."""
 
     audiofile = AudioFile(sheet_id=sheet_id,
                           file_type=file_type,
@@ -384,7 +300,7 @@ def add_file(sheet_id, file_type, url):
 
 
 def add_sheet_provider(sheet_id, provider_id):
-    """Adds a file to the database."""
+    """Adds a Provider to the database."""
 
     sheetprovider = SheetMusicProvider(sheet_id=sheet_id,
                                        provider_id=provider_id)
@@ -395,7 +311,158 @@ def add_sheet_provider(sheet_id, provider_id):
     # Commit the session/data to the dbase.
     db.session.commit()
 
+
+def add_piece_to_library(user_id, piece_id):
+    """Adds a UserPiece to the database, and the User's library (of pieces)."""
+
+    userpiece = UserPiece(piece_id=piece_id,
+                          user_id=user_id)
+
+    # Add to the session.
+    db.session.add(userpiece)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def add_sheet_to_library(user_id, sheet_id):
+    """Adds a UserSheet to the database, and the User's library (of sheet music)."""
+
+    usersheet = UserSheet(sheet_id=sheet_id,
+                          user_id=user_id)
+
+    # Add to the session.
+    db.session.add(usersheet)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def add_audiofile_to_library(user_id, file_id):
+    """Adds a UserAudioFile to the database, and the User's library (of A/V files)."""
+
+    userfile = UserAudioFile(file_id=file_id,
+                             user_id=user_id)
+
+    # Add to the session.
+    db.session.add(userfile)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
 #####################  OLD ATTEMPTS = DELETE? ##################################
+
+    # ## Editors IS A LIST, need to iterate & add each individually to SHEET table.
+    #     if "Editor:" in b_tag.contents:
+    #         editor = b_tag.next_element.next_element.next_element.string
+    #         editors.append(editor)
+    # ## Ed_notes IS A LIST, need to iterate & add each individually to SHEET table.
+    #     if "Edition notes:" in b_tag.contents:
+    #         ednote = b_tag.parent.get_text().replace("Edition notes: ", '')
+    #         ed_notes.append(ednote)
+    # ## Copyrights IS A LIST, need to iterate & add each individually to SHEET table.
+    #     if "Copyright:" in b_tag.contents:
+    #         copyright = b_tag.next_element.next_element.next_element.string
+    #         copyrights.append(copyright)
+
+######### OLD WAY - GETTING SHEET & AUDIOFILE TABLES DATA #####################
+
+    # # Get CPDL numbers for each piece's sheet music/files for SHEET and AudioFile
+    # # tables.
+    # # NB: CPDL # list correlates to may other lists (of items or dicts).
+    # #     Use this list to pull the correct index # or key for dbase entry!
+    # cpdl_nums = map(lambda x: x.string, soup('font'))
+
+    # # Get all the image files from the page, and cut out the first 2 items, we
+    # # then have all of the sheet music and audio files from the page.
+    # images = results['parse']['images']
+    # image_names = images[2:]
+
+    # ###### TESTING = TRYING TO GET ALL URLs IN ONE QUERY...BETTER/FASTER than
+    # # individual quesries for each file? ######
+
+    # # Make sure there are images - if not, return 'no files' message to user.
+    # if image_names != []:
+    #     # Create a number to assign each file to a group, in order, that will later
+    #     # correlate to the order of the CPDL #s list.
+    #     pdf_2_cpdl_index = 0
+    #     file_name_type_idx = [(images[pdf_2_cpdl_index], 'pdf', pdf_2_cpdl_index)]
+    #     # Since all records have the pdf first, then audio files, using pdf to
+    #     # split list of "images", AKA files!
+    #     for image in image_names[1:]:
+    #         if image.split('.')[-1] == 'pdf':
+    #             pdf_2_cpdl_index += 1
+    #             file_name_type_idx.append((image, 'pdf', pdf_2_cpdl_index))
+    #         else:
+    #             file_name_type_idx.append((image, str(image.split('.')[-1]), pdf_2_cpdl_index))
+
+    #     # Sort tuples list so it matches the order of the urls list, below.
+    #     files_sorted = sorted(file_name_type_idx)
+
+    #     # Format the list of images to be used in an API query.
+    #     imagelist = []
+
+    #     for image in image_names:
+    #         prep = "File:" + image
+    #         imagelist.append(prep)
+    #     # Sort the image files so the sorted results are in the same order, and
+    #     # can be associated later.
+    #     imagesort = sorted(imagelist)
+
+    #     filelist = "|".join(imagesort)
+
+    #     urls = get_urls(filelist, len(imagesort))
+
+    #     # All pieces being parsed in this way are CPDL, provider id (prid) 1.
+    #     provider_id = 1
+    #     sheet_ids = []
+
+    #     # files_sorted is a list of tuples. Each tuple contains 3 pieces of file
+    #     # info:
+    #     #   @ file_info[0] = filename (in same order and number as in the url list),
+    #     #   @ file_info[1] = type of file,
+    #     #   @ file_info[2] = cpdl list index # - also the index for related "short"
+    #     #                    lists that have one piece of data per cpdl #, such as
+    #     #                    editor, edition & license (copyright) info.
+    #     # First, pulling all PDFs - each pdf contains the SHEET of sheet music.
+    #     # Adding each Sheet to the dbase here, and collecting the sheet_ids as
+    #     # a list.
+    #     for i, file_info in enumerate(files_sorted):
+    #         if file_info[1] == 'pdf':
+    #             url = urls[i]
+    #             cpdl = cpdl_nums[file_info[2]]
+    #             ed = editors[file_info[2]]
+    #             ednote = ed_notes[file_info[2]]
+    #             lic = copyrights[file_info[2]]
+    #             sheet_id = add_sheet(piece_id,
+    #                                  prid,
+    #                                  url,
+    #                                  cpdl,
+    #                                  ed,
+    #                                  ednote,
+    #                                  lic)
+    #             sheet_ids.append((file_info[2], sheet_id))
+
+    #     # Sort sheet ids by cpdl index number, to be sure that the non-pdf files
+    #     # are each associated with the correct piece of sheet music. Each audio
+    #     # file is connected to its specific Sheet using the sheet_ids list (a
+    #     # sheet can have 0 or more associated files).
+
+    #     sheet_ids_sorted = sorted(sheet_ids)
+
+    #     file_ids = []
+
+    #     for i, file_info in enumerate(files_sorted):
+    #         if not file_info[1] == 'pdf':
+    #             sheet_id = sheet_ids_sorted[file_info[2]][1]
+    #             url = urls[i]
+    #             file_type = file_info[1]
+
+    #             file_id = add_file(sheet_id, file_type, url)
+    #             file_ids.append(file_id)
+
+    ################# OTHER OLD STUFF ##########################################
 
     # Get each piece of sheet music (.pdf) and audio files for each "user/editor"
     # and save as a dict of files by each cpdl #

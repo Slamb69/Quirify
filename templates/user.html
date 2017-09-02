@@ -17,7 +17,9 @@
         <ul>
         {% for concert in user.concerts %}
           <li>
-            {{ concert.name }}
+            <a href="/concerts/{{ concert.concert_id }}">
+              {{ concert.name }}
+            </a> 
           </li>
         {% endfor %}
         </ul>
@@ -25,17 +27,16 @@
 
       <h3>My Library</h3><br\>
       <!-- add button / link to search for a piece -->
-      {% if user.concerts %}
+      {% if user.user_pieces %}
 
         <ul>
-        {% for concert in user.concerts %}
+        {% for upiece in user.user_pieces %}
           <li>
-            {{ concert.name }}
+            <a href="/pieces/{{ upiece.piece.piece_id }}">{{ upiece.piece.title }}</a>
           </li>
         {% endfor %}
         </ul>
       {% endif %}
-      <p>ADD SEARCH / "Find new piece (sheet music)" field / link?</p><br\>
 
       <p>ADD GROUPS / "My Groups" list + create new button?</p><br\>
 
