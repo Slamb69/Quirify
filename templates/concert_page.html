@@ -6,27 +6,66 @@
 
 {% block content %}
 <div> 
-  <h2>{{ concert.name }} Setlist:</h2>
-    <ul style="list-style-type:none">
-      {% if concert.setlists %}
-        {% for setlist in concert.setlists %}
-          <li>{{ setlist.sheet.piece.title }}</li>
-        {% endfor %}
-      {% endif %}
-    </ul>
+  <h1>{{ concert.name }}</h1>
+  <p>{{ concert.description }}</p>
 </div>
 
+<span>
+  <h2>Concert Dates <button class="createbtn">Add new date</button></h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date</th>
+        
+        <th>Time</th>
+
+        <th>Event Name</th>
+        
+        <th>Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if concert.events %}
+       {% for event in concert.events %}
+          <tr>            
+            <td>{{ event.start_day_time.month }}/{{ event.start_day_time.day }}/{{ event.start_day_time.year }}</td>
+            <td>{{ event.start_day_time.hour }}</td>
+            <td>{{ event.name }}</td>
+            <td>{{ event.location }}</td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</span>
+<br/>
+
+
 <div>
-  <h2>Concert Dates:</h2>
-  <ul style="list-style-type:none">
-    {% if concert.events %}
-      {% for event in concert.events %}
-        <li> Event Name: {{ event.name }}</li>
-        <li> Date, Time (to be unpacked): {{ event.start_day_time }}, 
-                                          {{ event.end_day_time }}</li>
-        <li> Location: {{ event.location }}</li><br>
-      {% endfor %}
-    {% endif %}
-  </ul>
+  <h2>Concert program  <button class="createbtn">Add new piece</button> 
+    <a href="/"><button class="searchbtn">Seach for music</button></a></h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Piece title</th>
+        <th>Composer</th>
+        <th>Group</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if concert.concert_sheets %}
+        {% for concert_sheet in concert.concert_sheets %}
+          <tr>            
+            <td>{{ concert_sheet.sheet.piece.title }}</td>
+            <td>{{ concert_sheet.sheet.piece.composer }}</td>
+            <td>{{ concert_sheet.group_sheets[0].group.name}}</td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
 </div>
+
+
+
 {% endblock %}

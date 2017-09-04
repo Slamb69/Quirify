@@ -6,10 +6,11 @@ from flask import Flask, render_template, request, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
-                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider, Setlist,
-                   PerformerInstrument, Assignment, EventAssignment, Genre,
-                   PieceGenre, SheetMusicProvider, UserPiece, UserSheet,
-                   UserAudioFile, SheetMusicOwner, connect_to_db, db)
+                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider,
+                   GroupSheet, ConcertSheet, PerformerInstrument, Assignment,
+                   EventAssignment, Genre, PieceGenre, SheetMusicProvider,
+                   UserPiece, UserSheet, UserAudioFile, SheetMusicOwner,
+                   connect_to_db, db)
 
 import requests
 # To get text from CPDL pages, need Beautiful Soup!!
@@ -138,7 +139,9 @@ def parse_page_results(results, pg_id):
 
     if soup('li'):
         for i, cpdl in enumerate(soup('li')):
-            if cpdl.b.font:
+            if not cpdl.b:
+                continue
+            else:
                 cpdl_dict[i] = {'cpdl': cpdl.b.font.string,
                                 'files': []}
                 for a in cpdl.b.parent('a'):
@@ -151,37 +154,41 @@ def parse_page_results(results, pg_id):
                         cpdl_dict[i]['files'].append((a['href'].split(".")[-1],
                                                      a['href']))
 
-            # Since we know there were CPDL #s, grabbing the other info related to
-            # each edition of sheet music here, and adding to the edition_info list.
-            for i, dd in enumerate(soup('dd')):
-                # the text for each CPDL splits into 2 strings per CPDL #, so:
-                if not i % 2:
-                    # Editor, Copyright('lic') @ even "i", so (i/2) gives correct dict key #
-                    cpdl_dict[i/2]['editor'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
-                    cpdl_dict[i/2]['lic'] = dd.get_text().split(": ")[-1].strip()
-                if i % 2:
-                    #  Edition notes @ odd "i"s, so ((i - 1 )/ 2) gives correct dict key #
-                    cpdl_dict[(i-1)/2]['ednote'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
+        print "\n\n\nFIRST DICT = CPDLS, URLS" + str(cpdl_dict)
+
+        # Since we know there were CPDL #s, grabbing the other info related to
+        # each edition of sheet music here, and adding to the edition_info list.
+        for j, dd in enumerate(soup('dd')):
+            # the text for each CPDL splits into 2 strings per CPDL #, so:
+            if not j % 2:
+                # Editor, Copyright('lic') @ even "i", so (i/2) gives correct dict key #
+                cpdl_dict[j/2]['editor'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
+                cpdl_dict[j/2]['lic'] = dd.get_text().split(": ")[-1].strip()
+            if j % 2:
+                #  Edition notes @ odd "i"s, so ((i - 1 )/ 2) gives correct dict key #
+                cpdl_dict[(j-1)/2]['ednote'] = dd.get_text().split(":")[1].rstrip().split(" (")[0].strip()
 
         # Use cpdl_dict to add Sheet & Files to the database. IGNORE any CPDL #
         # edition that does not have a PDF as the first file!!! (ie, directs to
         # another website, or etc - only want the editions w/a PDF of the music.)
+        print "\n\n\nSECOND CPDL DICT w/ED NOTES" + str(cpdl_dict)
 
-            for i, edition in enumerate(cpdl_dict):
-                if cpdl_dict[i]['url'][0][0] == 'pdf':
-                    sheet_id = add_sheet(piece_id,
-                                         cpdl_dict[i]['url'][0][1],
-                                         cpdl_dict[i]['cpdl'],
-                                         cpdl_dict[i]['editor'],
-                                         cpdl_dict[i]['ednote'],
-                                         cpdl_dict[i]['lic'])
-                    # Add the files for each sheet, if any.
-                    if cpdl_dict[i]['files'][1:]:
-                        for j, fle in cpdl_dict[i]['files'][1:]:
-                            add_file(sheet_id,
-                                     cpdl_dict[i]['files'][j][0],
-                                     cpdl_dict[i]['files'][j][1])
-
+        for k, edition in enumerate(cpdl_dict):
+            if cpdl_dict[k]['files'][0][0] == 'pdf':
+                sheet_id = add_sheet(piece_id,
+                                     cpdl_dict[k]['files'][0][1],
+                                     cpdl_dict[k]['cpdl'],
+                                     cpdl_dict[k]['editor'],
+                                     cpdl_dict[k]['ednote'],
+                                     cpdl_dict[k]['lic'])
+                # Add the files for each sheet, if any.
+                if cpdl_dict[k]['files'][1]:
+                    for n, fle in enumerate(cpdl_dict[k]['files'][1:]):
+                        if len(cpdl_dict[k]['files'][n + 1][0]) < 5:
+                            (add_file(sheet_id,
+                                      cpdl_dict[k]['files'][n + 1][0],
+                                      cpdl_dict[k]['files'][n + 1][1]))
+                            print "Added {}".format(cpdl_dict[k]['files'][n + 1][1])
     return piece_id
 
 ######### HELPER FUNCTIONS FOR THE ABOVE FUNCTIONS - NOT USED ELSEWHERE ########
@@ -263,6 +270,8 @@ def add_piece_genre(piece_id, genre_id):
     # Commit the session/data to the dbase.
     db.session.commit()
 
+    return piece_genre.pg_id
+
 
 def add_sheet(pid, url, cpdl, ed, ednote, lic):
     """Adds a sheet to the database."""
@@ -311,7 +320,10 @@ def add_sheet_provider(sheet_id, provider_id):
     # Commit the session/data to the dbase.
     db.session.commit()
 
+    return sheetprovider.provider_id
 
+
+############ FUNCTIONS TO MANIPULATE THE DATABASE ###########################
 def add_piece_to_library(user_id, piece_id):
     """Adds a UserPiece to the database, and the User's library (of pieces)."""
 
@@ -323,6 +335,8 @@ def add_piece_to_library(user_id, piece_id):
 
     # Commit the session/data to the dbase.
     db.session.commit()
+
+    return userpiece.up_id
 
 
 def add_sheet_to_library(user_id, sheet_id):
@@ -337,6 +351,8 @@ def add_sheet_to_library(user_id, sheet_id):
     # Commit the session/data to the dbase.
     db.session.commit()
 
+    return usersheet.us_id
+
 
 def add_audiofile_to_library(user_id, file_id):
     """Adds a UserAudioFile to the database, and the User's library (of A/V files)."""
@@ -346,6 +362,21 @@ def add_audiofile_to_library(user_id, file_id):
 
     # Add to the session.
     db.session.add(userfile)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+    return userfile.uaf_id
+
+
+def del_piece_from_library(user_id, piece_id):
+    """Deletes a UserPiece from the database, and the User's library (of pieces)."""
+
+    userpiece = UserPiece.query.filter(UserPiece.user_id == user_id,
+                                       UserPiece.piece_id == piece_id).first()
+
+    # Delete from the session.
+    db.session.delete(userpiece)
 
     # Commit the session/data to the dbase.
     db.session.commit()

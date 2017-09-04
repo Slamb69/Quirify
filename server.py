@@ -2,24 +2,26 @@
 
 from jinja2 import StrictUndefined
 
-from flask import Flask, render_template, request, flash, redirect, session
+from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
-                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider, Setlist,
-                   PerformerInstrument, Assignment, EventAssignment, Genre,
-                   PieceGenre, SheetMusicProvider, UserPiece, UserSheet,
-                   UserAudioFile, SheetMusicOwner, connect_to_db, db)
+                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider,
+                   GroupSheet, ConcertSheet, PerformerInstrument, Assignment,
+                   EventAssignment, Genre, PieceGenre, SheetMusicProvider,
+                   UserPiece, UserSheet, UserAudioFile, SheetMusicOwner,
+                   connect_to_db, db)
 
-from helper_functions import (parse_search_results, parse_page_results)
+from helper_functions import (parse_search_results, parse_page_results,
+                              add_piece_to_library, del_piece_from_library)
 
 import requests
 # To get text from CPDL pages, need Beautiful Soup!!
-from bs4 import BeautifulSoup
-# For Beautiful Soup, need lxml's html
-from lxml import html
-# For Beautiful Soup, need regex
-import re
+# from bs4 import BeautifulSoup
+# # For Beautiful Soup, need lxml's html
+# from lxml import html
+# # For Beautiful Soup, need regex
+# import re
 
 app = Flask(__name__)
 
@@ -42,8 +44,8 @@ def none_filter(value):
 
 app.jinja_env.filters['none_filter'] = none_filter
 
-#############
 
+############# HOMEPAGE & NAVBAR ROUTES #################
 @app.route('/')
 def index():
     """Homepage."""
@@ -128,8 +130,10 @@ def login_process():
 def logout():
     """Log out."""
 
-    del session["user_id"]
-    flash("Logged Out.")
+    if session["user_id"]:
+        del session["user_id"]
+        flash("Logged Out.")
+
     return redirect("/")
 
 
@@ -195,15 +199,6 @@ def search_cpdl_page():
     return redirect("/pieces/%s" % piece.piece_id)
 
 
-@app.route("/users/<int:user_id>")
-def user_detail(user_id):
-    """Show info about user."""
-
-    user = User.query.get(user_id)
-
-    return render_template("user.html", user=user)
-
-
 @app.route("/library")
 def library():
     """Show user's library (Piece, Sheet, AudioFile)."""
@@ -224,6 +219,20 @@ def library():
 
 
 ############## ROUTES TO DISPLAY INDIVIDUAL ITEM PAGE BY ID ####################
+@app.route("/users/<int:user_id>")
+def user_detail(user_id):
+    """Show info about user."""
+
+    user = User.query.get(user_id)
+    groups = Group.query.all()
+    performers = Performer.query.all()
+
+    return render_template("user.html",
+                           user=user,
+                           groups=groups,
+                           performers=performers)
+
+
 @app.route("/pieces/<int:piece_id>", methods=['GET'])
 def piece_detail(piece_id):
     """Show logged in user info about a piece. allow them to choose a specific
@@ -251,9 +260,9 @@ def concert_page(concert_id):
 
     concert = Concert.query.get(concert_id)
 
-    setlists = Setlist.query.filter_by(concert_id=concert_id).all()
+    concert_sheets = ConcertSheet.query.filter_by(concert_id=concert_id).all()
 
-    return render_template("concert_page.html", concert=concert, setlists=setlists)
+    return render_template("concert_page.html", concert=concert, concert_sheets=concert_sheets)
 
 
 @app.route("/events/<int:event_id>", methods=['GET'])
@@ -265,24 +274,63 @@ def event_page(event_id):
     return render_template("event_page.html", event=event)
 
 
-@app.route("/groups/<int:group_id>", methods=['GET'])
-def group_page(group_id):
+@app.route("/groups/<group_code>", methods=['GET'])
+def group_page(group_code):
     """Show logged in user info about a concert."""
 
-    group = Group.query.get(group_id)
+    group = Group.query.get(group_code)
 
-    performers = Performer.query.filter_by(group_id=group_id).all()
+    perfs = PerformerGroup.query.filter_by(group_code=group_code).all()
 
-    return render_template("group_page.html", group=group, performers=performers)
-
-
-##########  ROUTES TO ADD TO LIBRARY ######################################
+    return render_template("group_page.html", group=group, perfs=perfs)
 
 
+##########  AJAX / JSON ROUTES = DBASE LIBRARY ACTIONS ######################
+@app.route("/add_upiece.json", methods=['POST'])
+def add_upiece():
+    """Adding a piece to the user's library"""
+
+    piece_id = request.form.get("piece_id")
+
+    piece = Piece.query.get(piece_id)
+
+    user_id = session.get("user_id")
+
+    add_piece_to_library(user_id, piece_id)
+
+    print "{} added to your library.".format(piece.title)
+
+    message = "{} added to your library.".format(piece.title)
+
+    result = {"message": message, "in_db": True}
+
+    return jsonify(result)
 
 
+@app.route("/del_upiece.json", methods=['POST'])
+def del_upiece():
+    """Deleting a piece from the user's library"""
+
+    print "\n\n\n GOT TO DEL UPIECE! \n\n\n"
+
+    piece_id = request.form.get("piece_id")
+
+    piece = Piece.query.get(piece_id)
+
+    user_id = session.get("user_id")
+
+    del_piece_from_library(user_id, piece_id)
+
+    print "{} deleted from your library.".format(piece.title)
+
+    message = "{} deleted from your library.".format(piece.title)
+
+    result = {"message": message, "in_db": False}
+
+    return jsonify(result)
 
 
+############ DUNDER MAIN STUFF ##############################################
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
     # that we invoke the DebugToolbarExtension

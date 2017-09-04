@@ -48,7 +48,7 @@ class Group(db.Model):
                            primary_key=True,
                            nullable=False)
     name = db.Column(db.String(128), nullable=False)
-    description = db.Column(db.String(2048))
+    description = db.Column(db.String(8048))
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date)
 
@@ -95,7 +95,7 @@ class Performer(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date)
     hourly_rate = db.Column(db.Integer)
-    notes = db.Column(db.String(2048))
+    notes = db.Column(db.String(9048))
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
@@ -124,7 +124,7 @@ class Instrument(db.Model):
 
 
 class PerformerInstrument(db.Model):
-    """Performer's Instruments model, association for instruments for each 
+    """Performer's Instruments model, association for instruments for each
        performer."""
 
     __tablename__ = "performer_instruments"
@@ -148,7 +148,7 @@ class PerformerInstrument(db.Model):
     def __repr__(self):
         """Print more useful info."""
         return ("<PerformerInstrument pi_id=%d perf_id=%s inst_code=%s>"
-                % (self.piece_id, self.performer_id, self.instrument_code))
+                % (self.pi_id, self.performer_id, self.instrument_code))
 
 
 class PerformerGroup(db.Model):
@@ -177,7 +177,9 @@ class PerformerGroup(db.Model):
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return "<performer_group id=%d name=%s>" % (self.performer_group_id, self.name)
+        return "<Perf_group_id=%d group=%s perf=%s>" % (self.perf_group_id,
+                                                        self.group_code,
+                                                        self.performer.fname)
 
 
 class Provider(db.Model):
@@ -217,9 +219,9 @@ class Piece(db.Model):
     original_voicing = db.Column(db.String(56))
     original_language = db.Column(db.String(56))
     original_instrumentation = db.Column(db.String(248))
-    text_original = db.Column(db.String(2048))
-    text_english = db.Column(db.String(2048))
-    description = db.Column(db.String(2048))
+    text_original = db.Column(db.String(8048))
+    text_english = db.Column(db.String(8048))
+    description = db.Column(db.String(9948))
 
     # Function to check whether a piece is in the session user's library.
     def is_users_piece(self, user_id):
@@ -407,17 +409,18 @@ class Concert(db.Model):
         return "<Concert id=%d name=%s>" % (self.concert_id, self.name)
 
 
-class Setlist(db.Model):
-    """Setlist model. Association of Sheet Music for a Concert. Setlist can apply
+class ConcertSheet(db.Model):
+    """ConcertSheet model. Association of Sheet Music for a Concert. Concert
+       sheet can apply
        to various events & have various performer/instrument assignments at each
        event."""
 
-    __tablename__ = "setlists"
+    __tablename__ = "concert_sheets"
 
     # create the db columns.
-    setlist_id = db.Column(db.Integer,
-                           primary_key=True,
-                           autoincrement=True)
+    cs_id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
     sheet_id = db.Column(db.Integer,
                          db.ForeignKey('sheets.sheet_id'),
                          nullable=False)
@@ -427,21 +430,51 @@ class Setlist(db.Model):
     sheet_finalized = db.Column(db.Boolean)
 
     # Define a relationship w/Sheet class via sheet_id foreign key.
-    sheet = db.relationship('SheetMusic', backref='setlists')
+    sheet = db.relationship('SheetMusic', backref='concert_sheets')
 
     # Define a relationship w/Concert class via concert_id foreign key.
-    concert = db.relationship('Concert', backref='setlists')
+    concert = db.relationship('Concert', backref='concert_sheets')
 
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return ("<Setlist id=%d concert=%s, sheet=%s>" % (self.setlist_id,
-                                                          self.concert.name,
-                                                          self.sheet.sheet_id))
+        return ("<Concert Sheet id=%d concert=%s, sheet=%s>" % (self.cs_id,
+                                                                self.concert.name,
+                                                                self.sheet.sheet_id))
+
+
+class GroupSheet(db.Model):
+    """GroupSheet model, association for groups with concert/sheet table."""
+
+    __tablename__ = "group_sheets"
+
+    # create the db columns.
+    gs_id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    group_code = db.Column(db.String(48),
+                           db.ForeignKey('groups.group_code'),
+                           nullable=False)
+    cs_id = db.Column(db.Integer,
+                      db.ForeignKey('concert_sheets.cs_id'),
+                      nullable=False)
+
+    # Define a relationship w/Group class via group_code foreign key.
+    group = db.relationship('Group', backref='group_sheets')
+
+    # Define a relationship w/Performer class via performer_id foreign key.
+    concert_sheet = db.relationship('ConcertSheet', backref='group_sheets')
+
+    # define repr function to print some useful info re:db objects.
+    def __repr__(self):
+        """Print more useful info."""
+        return "<Group sheets id=%d group=%s consheet=%d>" % (self.gs_id,
+                                                              self.group_code,
+                                                              self.cs_id)
 
 
 class Event(db.Model):
-    """Event model, a specific Concert + Setlist."""
+    """Event model, a specific Concert + ConcertSheets."""
 
     __tablename__ = "events"
 
@@ -501,7 +534,7 @@ class Assignment(db.Model):
 
 
 class EventAssignment(db.Model):
-    """Assigned set model. Association table."""
+    """Assigned Event model. Association table."""
 
     __tablename__ = "event_assignments"
 
@@ -520,7 +553,7 @@ class EventAssignment(db.Model):
     # Define a relationship w/Assignment class via assignment_id foreign key.
     assignment = db.relationship('Assignment', backref='event_assignments')
 
-    # Define a relationship w/Setlist class via setlist_id foreign key.
+    # Define a relationship w/Event class via event_id foreign key.
     event = db.relationship('Event', backref='event_assignments')
 
     # define repr function to print some useful info re:db objects.
@@ -699,7 +732,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use our database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///musictest'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///music'
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 <head>
-    <title>{% block title %}In Concert{% endblock%}</title>
+<title>{% block title %}{% endblock%}</title>
 </head>
 
 {% block content %}
@@ -20,15 +20,13 @@
     <form action="search" method="GET">
       <div class="form-group">
         <label>
-          Search for a piece by name, composer, or key word.
+          <h3>Search for a piece by title, composer, or key word.</h3>
         </label>
 
-        <br\>
         <input type="text" name="search" class="formfield" required>
-      </div>
-
+      </div><br>
       <div class="form-group">
-        <br\><input type="submit" value="Search" class="btn go">
+        <br\><input type="submit" value="Search" class="submitbtn">
       </div>
     </form>
 {% endif %}

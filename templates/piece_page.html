@@ -7,11 +7,13 @@
 {% block content %}
 <div> 
   <h2>{{ piece.title }}
-    {% if piece.is_users_piece(session.get('user_id')) %}
-      <button id="del_upiece" name="upiecedel" class="db_delbtn">Remove from Library</button>
-    {% else %}
-      <button id="add_upiece" name="upieceadd" class="db_addbtn">Add to Library</button>
-    {% endif %}
+    <span class="btnToggle">
+      {% if piece.is_users_piece(session.get('user_id')) %}
+        <button name="upiecedel" class="del_upiece" data-pieceId="{{ piece.piece_id }}">Remove from Library</button>
+      {% else %}
+        <button name="upieceadd" class="add_upiece" data-pieceId="{{ piece.piece_id }}">Add to Library</button>
+      {% endif %}
+    </span>
   </h2>
 
   <ul style="list-style-type:none">
@@ -51,5 +53,41 @@
       <div>{{ piece.text_english|safe }}</div>
     </div>
   {% endif %}
+
+<script type="text/javascript">
+"use strict";
+
+// Success function when item added to or deleted from user's library.
+function alertLibraryResult(result) {
+    alert(result.message);
+    $('btnToggle').load(result.in_db)
+}
+
+// event listener & handler to delete Piece from UserPiece library.
+$(".del_upiece").on("click", function (evt) {
+
+    var formInput = {"piece_id": $(evt.currentTarget).data("pieceid")};
+
+    // console.log(evt.currentTarget);
+    // console.log(formInput);
+
+    $.post("/del_upiece.json",
+           formInput,
+           alertLibraryResult);
+});
+
+// event listener & handler to add Piece to UserPiece library.
+$(".add_upiece").on("click", function (evt) {
+
+    var formInput = {"piece_id": $(evt.currentTarget).data("pieceid")};
+
+    // console.log(evt.currentTarget);
+    // console.log(formInput);
+
+    $.post("/add_upiece.json",
+           formInput,
+           alertLibraryResult);
+});
+</script>
 
 {% endblock %}

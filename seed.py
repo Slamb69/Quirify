@@ -4,10 +4,11 @@ import datetime
 # from sqlalchemy import func
 
 from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
-                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider, Setlist,
-                   PerformerInstrument, Assignment, EventAssignment, Genre,
-                   PieceGenre, SheetMusicProvider, UserPiece, UserSheet,
-                   UserAudioFile, SheetMusicOwner, connect_to_db, db)
+                   PerformerGroup, Piece, SheetMusic, AudioFile, Provider,
+                   GroupSheet, ConcertSheet, PerformerInstrument, Assignment,
+                   EventAssignment, Genre, PieceGenre, SheetMusicProvider,
+                   UserPiece, UserSheet, UserAudioFile, SheetMusicOwner,
+                   connect_to_db, db)
 
 from server import app
 
@@ -340,22 +341,41 @@ def load_concerts():
     db.session.commit()
 
 
-def load_setlists():
-    """Load setlists from setlist.txt into database."""
+def load_concert_sheets():
+    """Load concertsheets from consheet.txt into database."""
 
-    print "Setlists"
+    print "Concert Sheets"
 
-    for i, row in enumerate(open("data/setlist.txt")):
+    for i, row in enumerate(open("data/consheet.txt")):
         row = row.rstrip()
 
         sheet_id, concert_id, sheet_finalized = row.split("| ")
 
-        setlist = Setlist(sheet_id=sheet_id,
-                          concert_id=concert_id,
-                          sheet_finalized=sheet_finalized)
+        consheet = ConcertSheet(sheet_id=sheet_id,
+                                concert_id=concert_id,
+                                sheet_finalized=sheet_finalized)
 
         # Add to the session.
-        db.session.add(setlist)
+        db.session.add(consheet)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def load_group_sheets():
+    """Load group sheets from grpsheet.txt into database."""
+
+    print "Setlists"
+
+    for i, row in enumerate(open("data/grpsheet.txt")):
+        row = row.rstrip()
+
+        group_code, cs_id = row.split("| ")
+
+        grpsheet = GroupSheet(group_code=group_code, cs_id=cs_id)
+
+        # Add to the session.
+        db.session.add(grpsheet)
 
     # Commit the session/data to the dbase.
     db.session.commit()
@@ -500,7 +520,8 @@ if __name__ == "__main__":
     load_genres()
     load_piecegenres()
     load_concerts()
-    load_setlists()
+    load_concert_sheets()
+    load_group_sheets()
     load_events()
     load_assignments()
     load_event_assignments()

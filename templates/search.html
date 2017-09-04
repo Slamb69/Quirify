@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}Search for music{% endblock%}</title>
+</head>
+
+{% block content %}
+{% if "user_id" in session %}
+  </div>
+    <form action="search" method="GET">
+      <div class="form-group">
+        <label>
+          Search for a piece by title, composer, or key word.
+        </label>
+
+        <br\>
+        <input type="text" name="search" class="formfield" required>
+      </div>
+
+      <div class="form-group">
+        <br\><input type="submit" value="Search" class="btn go">
+      </div>
+    </form>
+{% endif %}
+
+{% endblock %}

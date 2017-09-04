@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}My Pieces{% endblock%}</title>
+</head>
+
+{% block content %}
+<div id="pieces_list">
+<h1 class="title" id="pieces_title">My pieces</h1>  
+  <ul>
+    {% for piece in pieces %}
+      <li>
+        <a href="/pieces/{{ piece.piece_id }}">
+          {{ piece.title }} ({{ piece.composer }})
+        </a>
+        {% if piece.sheets %}
+          <ul>
+            {% for sheet in piece.sheets %}
+              <li><a href="/sheets/{{ sheet.sheet_id }}">
+                {{ sheet.version_description }} ({{ sheet.voicing }}, {{ sheet.key}})
+              </a>
+            </li>
+            {% endfor %}
+          </ul> 
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>  
+{% endblock %}

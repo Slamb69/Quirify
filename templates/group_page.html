@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}{{ group.name }}{% endblock%}</title>
+</head>
+
+{% block content %}
+<div> 
+  <h1>{{ group.name }}</h1>
+  <p>{{ group.description }}</p>
+  <p>Start date: {{ group.start_date.year}}<br/>
+    {% if group.end_date %} End date: {{ group.end_date.year }}{% endif %}</p>
+</div>
+
+<span>
+  <h2>Concerts <button class="createbtn">Create new concert</button></h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Concert Title</th>
+        <th>Year</th>
+        <th>Number of Performances</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if group.group_sheets %}
+       {% for gsheet in group.group_sheets %}
+          <tr>            
+            <td>{{ gsheet.concert_sheets.concert.title }}/</td>
+            <td>{{ gsheet.concert_sheets.concert.events[0].start_day_time.year }}</td>
+            <td>{{ gsheet.concert_sheets.concert.events|count }}</td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</span>
+<br/>
+
+
+<div>
+  <h2>Personnel  <button class="createbtn">Add new person</button></h2>
+</div>
+
+
+{% endblock %}

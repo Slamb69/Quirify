@@ -8,13 +8,12 @@
   {% if "user_id" in session %}
     <br>
     <div>
-      <h2>My Home Page</h2>
+      <h2>My Information at-a-glance</h2>
 
-      <h3>My Concerts</h3><br\>
-      <!-- add button / links to create a new concert -->
+      <h3>Concerts <button class="createbtn">Create a Concert</button></h3>
+      <!-- add popup/expanding hidden form/or new page link? to create a new concert -->
       {% if user.concerts %}
-
-        <ul>
+      <ul style="list-style-type:none">
         {% for concert in user.concerts %}
           <li>
             <a href="/concerts/{{ concert.concert_id }}">
@@ -25,11 +24,10 @@
         </ul>
       {% endif %}
 
-      <h3>My Library</h3><br\>
+      <h3>Library <a href="/"><button class="searchbtn">Seach for music</button></a></h3>
       <!-- add button / link to search for a piece -->
       {% if user.user_pieces %}
-
-        <ul>
+      <ul style="list-style-type:none">
         {% for upiece in user.user_pieces %}
           <li>
             <a href="/pieces/{{ upiece.piece.piece_id }}">{{ upiece.piece.title }}</a>
@@ -38,9 +36,33 @@
         </ul>
       {% endif %}
 
-      <p>ADD GROUPS / "My Groups" list + create new button?</p><br\>
+      <h3>Performance Groups <button class="createbtn">Create a Group</button></h3>
+        {% if groups %}
+        <ul style="list-style-type:none">
+          {% for group in groups %}
+            <li>
+              <a href="/groups/{{ group.group_code }}">{{ group.name }}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        {% endif %}
 
-      <p>ADD ROSTERS / "My Rosters" list + create new button?</p><br\>
+     <h3>Roster <button class="createbtn">Add a performer</button></h3>
+      {% if performers %}
+        <ul style="list-style-type:none">
+          {% for performer in performers %}
+            <li>
+              <a href="/performer/{{ performer.performer_id }}">{{ performer.fname }} {{ performer.lname }}</a> 
+              {% if performer.performer_instruments %}
+                &nbsp;&nbsp;<i>Parts: 
+                {% for inst in performer.performer_instruments %}
+                  {{ inst.instrument.name }}&nbsp;
+                {% endfor %}</i>
+              {% endif %}
+            </li>
+          {% endfor %}
+          </ul>
+        {% endif %}
 
     </div>
   {% else %}
