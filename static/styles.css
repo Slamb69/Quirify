@@ -7,17 +7,24 @@
   padding-top: 70px;
 }
 
-.nav, .navbar-nav, .navbar-default {
+.nav, .navbar-nav, .navbar-default >li {
     color: #210121;
     font-size: 14pt;
     background-color: #fafbf9;
     font-family: Poppins, Sans-serif;
 }
 
+p, li {
+    font-size: 13pt;
+    font-family: Taviraj, serif;
+}
+
+
 img {
     width: 5em;
     font-size: 14pt;
 }
+
 
 .home {
     width: 10em;
@@ -54,8 +61,6 @@ body {
     background-image: url("images/linedpaper_@2x.png");
     background-color: #fff;
     padding-top: 65px;
-/*    font-family: Taviraj, serif;
-    font-size: 12pt;*/
 }
 
 
@@ -99,11 +104,6 @@ h3 {
     font-size: 26pt;
 }
 
-p, li {
-    font-size: 13pt;
-    font-family: Taviraj, serif;
-}
-
 
 .navbar-default .navbar-fixed-bottom {
   position: absolute;
@@ -135,7 +135,7 @@ body > .container {
     background-color: #f2f2f2;
 }
 
-/*.main {
-    background-color: #;
-}*/
+li.navbtn {
+    font-family: Poppins, Sans-serif !important; 
+}
 
