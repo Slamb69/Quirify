@@ -6,29 +6,47 @@
 
 {% block content %}
 
-  <div id="homepage-block">
-    <h1 id="homepage-title">In Concert</h1>
+<div id="homepage-block">
+    <!-- <h1 id="homepage-title">Quirify</h1><br/> -->
+    <div>
+      <img class="home" src="/static/images/QuirifyLogo_transparent.png" alt="Quirify">
+    </div>
       <h2>Your comprehensive music library and concert planning tool.</h2>
 
-{% if not "user_id" in session %}
-        <p>Some very informative stuff about this AMAZING app, and why you
-          really should <a href="/register"> register today!</a></p>
-{% endif %}
-
-{% if "user_id" in session %}
-  </div>
+{% if "user_id" in session %} 
+  <div class="container-fluid">
     <form action="search" method="GET">
       <div class="form-group">
         <label>
           <h3>Search for a piece by title, composer, or key word.</h3>
         </label>
-
+        <br/>
         <input type="text" name="search" class="formfield" required>
-      </div><br>
+      </div>
       <div class="form-group">
-        <br\><input type="submit" value="Search" class="submitbtn">
+        <input type="submit" value="Search" class="btn btn-success">
       </div>
     </form>
-{% endif %}
+  </div>
+{% endif %} 
+
+ 
+<div class="container">
+  <div class="jumbotron">
+  <h1 class="pink"><a href="/register">Quirify your choir</a></h1>
+    <br/><h2 class="ivory">In one...<br>
+Quirify's mission is to provide all of the tools you need to manage your choirs, in one place. <h2>
+    <br/> 
+     <h2 class="ivory">And two...<br>Search for, upload, and store pieces, favorite editions of sheet music, and associated audio files, and keep them in a personalized virtual music library. </h2> 
+    <br/> 
+     <h2 class="ivory">And three...<br>
+   Free and easy concert creation; from programming repertoire, to set-list assignments by performer and part, to generating your program notes for ticketing and print materials.  </h2>
+      <br>
+<h2 class="ivory">And four....<br>So much more: manage rosters and schedules, budgets, licenses, concert logistics, and historic data.  </h2>
+
+  <h3 class="pink" id="jumbo_h3"><a href="/register">Now is the perfect time 4/2 Quirify!</a></h3>
+</div>
+  </div>     
+</div>
 
 {% endblock %}

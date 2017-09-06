@@ -5,15 +5,17 @@
 </head>
 
 {% block content %}
-<div> 
-  <h2>{{ piece.title }}
+<div class="container-fluid"> 
+  <div>
+  <h2>{{ piece.title }} &nbsp;&nbsp;
     <span class="btnToggle">
-      {% if piece.is_users_piece(session.get('user_id')) %}
-        <button name="upiecedel" class="del_upiece" data-pieceId="{{ piece.piece_id }}">Remove from Library</button>
-      {% else %}
-        <button name="upieceadd" class="add_upiece" data-pieceId="{{ piece.piece_id }}">Add to Library</button>
-      {% endif %}
+        <button class="del_upiece" id="del-{{ piece.piece_id }}" data-pieceId="{{ piece.piece_id }}" 
+        {% if not piece.is_users_piece(session.get('user_id')) %}hidden{% endif %}>Remove from 
+        Library</button>
+        <button class="add_upiece" id="add-{{ piece.piece_id }}" data-pieceId="{{ piece.piece_id }}" {% if piece.is_users_piece(session.get('user_id')) %}hidden{% endif %}>Add to Library</button>
     </span>
+
+
   </h2>
 
   <ul style="list-style-type:none">
@@ -32,62 +34,40 @@
 
   </ul>
 </div>
+<div>
   {% if piece.sheets %}
-    <div><h3>Sheet music versions:</h3>
+      <h3>Sheet music versions:</h3>
       <ul style="list-style-type:none">{% for sheet in piece.sheets %}
-        <li><a href="/sheets/{{ sheet.sheet_id }}">{{ sheet.edition_notes }}
-          (ID #:{{ sheet.sheet_id }})
-           </a></li>
-      {% endfor %}</ul>
-    </div>
-  
-  {% endif %}
-    {% if piece.text_original %}
-    <div><h3>Original {{ piece.original_language }} Text:</h3>
-      <div>{{ piece.text_original|safe }}</div>
-    </div>
-  {% endif %}
+        <li>
+          <a href="/sheets/{{ sheet.sheet_id }}">{{ sheet.edition_notes }}
+            (ID #:{{ sheet.sheet_id }})
+           </a> &nbsp;&nbsp;        
+            <span class="btnToggle">
+              <button class="del_usheet" id="del-{{sheet.sheet_id}}" data-sheetId="{{ sheet.sheet_id }}" {% if not sheet.is_users_sheet(session.get('user_id')) %}hidden{% endif %}>Remove from Library</button>
+              <button class="add_usheet" id="add-{{sheet.sheet_id}}" data-sheetId="{{ sheet.sheet_id }}" {% if sheet.is_users_sheet(session.get('user_id')) %}hidden{% endif %}>Add to Library</button>
+            </span>
+        </li> 
+      {% endfor %}
+      </ul> 
+      {% endif %}
+  </div> 
+ 
+      <div>
+        {% if piece.text_original %}
+        <div><h3>Original {{ piece.original_language }} Text:</h3>
+          <div>{{ piece.text_original|safe }}</div>
+        </div>
+          {% endif %}
+      </div>
+</div>
 
   {% if piece.text_english %}
     <div><h3>English Translation:</h3>
-      <div>{{ piece.text_english|safe }}</div>
+      <p class="texts">{{ piece.text_english|safe }}
+    </p>
     </div>
   {% endif %}
 
-<script type="text/javascript">
-"use strict";
-
-// Success function when item added to or deleted from user's library.
-function alertLibraryResult(result) {
-    alert(result.message);
-    $('btnToggle').load(result.in_db)
-}
-
-// event listener & handler to delete Piece from UserPiece library.
-$(".del_upiece").on("click", function (evt) {
-
-    var formInput = {"piece_id": $(evt.currentTarget).data("pieceid")};
-
-    // console.log(evt.currentTarget);
-    // console.log(formInput);
-
-    $.post("/del_upiece.json",
-           formInput,
-           alertLibraryResult);
-});
-
-// event listener & handler to add Piece to UserPiece library.
-$(".add_upiece").on("click", function (evt) {
-
-    var formInput = {"piece_id": $(evt.currentTarget).data("pieceid")};
-
-    // console.log(evt.currentTarget);
-    // console.log(formInput);
-
-    $.post("/add_upiece.json",
-           formInput,
-           alertLibraryResult);
-});
-</script>
 
 {% endblock %}
+

@@ -382,6 +382,33 @@ def del_piece_from_library(user_id, piece_id):
     db.session.commit()
 
 
+def del_sheet_from_library(user_id, sheet_id):
+    """Deletes a UserSheet from the database, and the User's library (of sheet
+        music)."""
+
+    usersheet = UserSheet.query.filter(UserSheet.user_id == user_id,
+                                       UserSheet.sheet_id == sheet_id).first()
+
+    # Delete from the session.
+    db.session.delete(usersheet)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
+
+def del_audiofile_from_library(user_id, file_id):
+    """Deletes a UserAudioFile from the database, and the User's library (of
+        audio files)."""
+
+    userfile = UserAudioFile.query.filter(UserAudioFile.user_id == user_id,
+                                          UserAudioFile.file_id == file_id).first()
+
+    # Delete from the session.
+    db.session.delete(userfile)
+
+    # Commit the session/data to the dbase.
+    db.session.commit()
+
 #####################  OLD ATTEMPTS = DELETE? ##################################
 
     # ## Editors IS A LIST, need to iterate & add each individually to SHEET table.

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+<head>
+    <title>{% block title %}{{ performer.fname }} {{ performer.lname }}{% endblock%}</title>
+</head>
+
+{% block content %}
+<div class="container-fluid"> 
+  <div>
+    <h1>Performer Information</h1>
+  </div>
+
+  <div>
+    <h2 class="pink">{{ performer.fname }} {{ performer.lname }}</h2>
+  </div>
+  
+  <div>
+    <h3>Member of (active groups)</h3>
+    <ul style="list-style-type:none">
+      {% if perfgrps %}
+        {% for group in perfgrps %}
+        <li>{{ group.group.name }}</li>
+        {% endfor %}
+      {% endif %}
+  </div>
+
+  <div>
+    <h3>Parts / Instruments</h3>
+      <ul style="list-style-type:none">
+      {% if perfinsts %}
+        {% for inst in perfinsts %}
+        <li>{{ inst.instrument.instrument_code}} / {{ inst.instrument.name }}</li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+      
+    <div>
+    <h3>All about {{ performer.fname }}</h3><ul style="list-style-type:none">
+      <li>Performer ID#: <strong>{{ performer.performer_id }}</strong></li>
+      <li>Email: <strong>{{ performer.email }}</strong></li>
+      <li>Phone: <strong>{{ performer.phone}}</strong></li>
+      <li>Start Date: <strong>{{ performer.start_date }}</strong></li>
+      <li>End Date: <strong>{{ performer.end_date}}</strong></li>
+      <li>Hourly rate: {% if performer.hourly_rate %}}
+            <strong>${{ performer.hourly_rate/100 }}</strong>{% endif %}</li>
+      <li>Notes: <strong>{{ performer.notes }}</strong></li>
+    </ul>
+  </div>
+</div>
+</div>
+
+
+
+{% endblock %}

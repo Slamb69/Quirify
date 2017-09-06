@@ -1,36 +1,35 @@
 {% extends 'base.html' %}
 
 <head>
-    <title>{% block title %}{{ concert.name }}{% endblock%}</title>
+    <title>{% block title %}{{ Assignments }}{% endblock%}</title>
 </head>
 
 {% block content %}
 <div class="container-fluid"> 
-  <h1>{{ concert.name }}</h1>
-  <p>{{ concert.description }}</p>
-
-
-
-<h2>Concert Dates</h2> &nbsp; &nbsp; <button class="btn btn-primary btn-group btn-group-xs">New</button>
+  <h1>Assignments</h1>&nbsp; &nbsp; <button class="btn btn-primary btn-group btn-group-xs">New</button>
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>Date</th>
-        
-        <th>Time</th>
+        <th>Piece</th>
 
-        <th>Event Name</th>
+        <th>Sheet Music (if final)</th>
         
-        <th>Location</th>
+        <th>Part</th>
+
+        <th>Performer</th>
+        
+        <th>Concert</th>
+
+        {% if evtassign.event %}
+        {% for i in assignment.concert.events %}<th>
+         Event {{ i|loop.index }}</th>{% endfor %}{% endif %}
+
       </tr>
     </thead>
-    <tbody>
-      {% if concert.events %}
-       {% for event in concert.events %}
           <tr>            
-            <td>{{ event.start_day_time.month }}/{{ event.start_day_time.day }}/{{ event.start_day_time.year }}</td>
-            <td>{{ event.start_day_time.hour }}</td>
-            <td>{{ event.name }}</td>
+            <td><a href="/piece/{{ assignment.concert_sheet.sheet.piece.piece_id }}">{{ assignment.concert_sheet.sheet.piece.title }}</a></td>
+            <td><a href="/sheet/{{ assignment.concert_sheet.sheet.sheet_id }}">{{ assignment.concert_sheet.sheet.sheet_id }}</a></td>
+            <td>{{ perfinst }}</td>
             <td>{{ event.location }}</td>
           </tr>
         {% endfor %}
@@ -42,7 +41,7 @@
 
 
 <div>
-  <h2>Concert program</h2>  &nbsp; &nbsp;<button class="btn btn-primary btn-group btn-group-sm">New</button> 
+  <h2>Assignments</h2>  &nbsp; &nbsp;<button class="btn btn-primary btn-group btn-group-sm">New</button> 
     <a href="/"><button class="btn btn-success btn-group btn-group-sm">Search for music</button></a>
   <table class="table table-striped">
     <thead>

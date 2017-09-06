@@ -1,6 +1,6 @@
-First1| Last1| email1| phone1| 01/01/2001| | 51.75| Really great soprano plus violin
-First2| Last2| email2| phone2| 02/02/2002| 05/05/2007| | Really great soprano1, 2 or alto 1
-First3| Last3| email3| phone3| 03/03/2003| | | Excellent Second sop or Alto 1, maybe A2
-First4| Last4| email4| phone4| 04/04/2004| | | Alto 1, 2, Tenor 1, Guitar, Harp
-First5| Last5| email5| phone5| 05/05/2005| | | Good Tenor 1, 2, or decent Baritone
-First6| Last6| email6| phone6| 06/06/2006| | | Flexible Baritone or Bass 1, 2, Drums
+Jane| Doremi| email1| phone1| 01/01/2001| | 51.75| Really great soprano plus violin
+Mary| Hadda-little| email2| phone2| 02/02/2002| 05/05/2007| | Really great soprano1, 2 or alto 1
+Jill| Rocks| email3| phone3| 03/03/2003| | | Excellent Second sop or Alto 1, maybe A2
+Sally| Singer| email4| phone4| 04/04/2004| | | Alto 1, 2, Tenor 1, Guitar, Harp
+Joe| Blow| email5| phone5| 05/05/2005| | | Good Tenor 1, 2, or decent Baritone
+Bob| Bass| email6| phone6| 06/06/2006| | | Flexible Baritone or Bass 1, 2, Drums

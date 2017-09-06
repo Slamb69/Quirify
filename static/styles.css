@@ -1,1 +1,141 @@
-styles.css
+.affix {
+  top: 0;
+  width: 100%;
+}
+
+.affix + .container-fluid {
+  padding-top: 70px;
+}
+
+.nav, .navbar-nav, .navbar-default {
+    color: #210121;
+    font-size: 14pt;
+    background-color: #fafbf9;
+    font-family: Poppins, Sans-serif;
+}
+
+img {
+    width: 5em;
+    font-size: 14pt;
+}
+
+.home {
+    width: 10em;
+}
+
+.navbar-fixed-bottom{
+    font-size: 10pt;
+}
+/* unvisited link */
+a:link {
+    color: #D13277;
+}
+
+/* visited link */
+a:visited {
+    color: #D13277;
+}
+
+/* mouse over link */
+a:hover {
+    color: #DB3311;
+}
+
+/* selected link */
+a:active {
+    color: #D13277;
+}
+
+.pink {
+    color: #D13277;
+}
+
+body {
+    background-image: url("images/linedpaper_@2x.png");
+    background-color: #fff;
+    padding-top: 65px;
+/*    font-family: Taviraj, serif;
+    font-size: 12pt;*/
+}
+
+
+h1 {
+    font-family: Poppins, Sans-serif;
+    font-size: 24pt;
+    display: inline-block;
+}
+
+form {
+    font-family: Taviraj, serif;
+    font-size: 12pt;
+}
+
+
+h2 {
+    font-family: Poppins, Sans-serif;
+    display: inline-block;
+    font-size: 16pt;
+}
+
+h3 {
+    font-family: Cormorant Upright, serif;
+    display: inline-block;
+    font-size: 19pt;
+}
+
+
+.jumbotron {
+    background-image: url("images/wild_oliva_@2x.png");
+    background-color: black;
+    font-family: Taviraj, serif;
+}
+
+.ivory {
+    font-size: 12pt;
+    color: #EEF2FB;
+}
+
+#jumbo_h3 {
+    font-size: 26pt;
+}
+
+p, li {
+    font-size: 13pt;
+    font-family: Taviraj, serif;
+}
+
+
+.navbar-default .navbar-fixed-bottom {
+  position: absolute;
+  bottom: 0;
+  padding-top: 5px;
+  width: 100%;
+  height: 50px;
+  background-color: #fff;
+}
+
+body > .container {
+    padding-bottom: 60px;
+}
+
+.black {
+    background-image: url("/static/images/footer_piano.jpg");
+    width: 100%;
+    background-color: #fff;
+    min-height: 50px;
+    color: #a1a4a8;
+    font-family: Poppins, Sans-serif;
+}
+
+.smalltxt {
+    font-size: 10pt;
+}
+
+.side {
+    background-color: #f2f2f2;
+}
+
+/*.main {
+    background-color: #;
+}*/
+

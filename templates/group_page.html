@@ -24,13 +24,12 @@
     </thead>
     <tbody>
       {% if group.group_sheets %}
-       {% for gsheet in group.group_sheets %}
           <tr>            
-            <td>{{ gsheet.concert_sheets.concert.title }}/</td>
-            <td>{{ gsheet.concert_sheets.concert.events[0].start_day_time.year }}</td>
-            <td>{{ gsheet.concert_sheets.concert.events|count }}</td>
+            <td>{{ group.group_sheets[0].concert_sheet.concert.name }}</td>
+            <td>{{ group.group_sheets[0].concert_sheet.concert.events[0].start_day_time.year }}</td>
+            <td>{{ group.group_sheets[0].concert_sheet.concert.events|count }}</td>
           </tr>
-        {% endfor %}
+
       {% endif %}
     </tbody>
   </table>
@@ -40,6 +39,10 @@
 
 <div>
   <h2>Personnel  <button class="createbtn">Add new person</button></h2>
+</div>
+
+<div>
+  <h2>Repertoire List  <button class="createbtn">Add new piece</button></h2>
 </div>
 
 

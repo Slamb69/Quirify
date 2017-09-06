@@ -8,9 +8,9 @@
 <div id="pieces_list">
 <h1 class="title" id="pieces_title">My pieces</h1>  
   <ul>
-    {% for piece in pieces %}
+    {% for upiece in user_pieces %}
       <li>
-        <a href="/pieces/{{ piece.piece_id }}">
+        <!-- <a href="/pieces/{{ upiece.piece_id }}"> STOPPED HERE!-->
           {{ piece.title }} ({{ piece.composer }})
         </a>
         {% if piece.sheets %}
@@ -19,6 +19,12 @@
               <li><a href="/sheets/{{ sheet.sheet_id }}">
                 {{ sheet.version_description }} ({{ sheet.voicing }}, {{ sheet.key}})
               </a>
+                  <span class="btnToggle">
+<!--       {{ piece.is_users_piece(session.get('user_id')) }} -->
+        <button class="del_upiece" id="del-{{piece.piece_id}}" data-pieceId="{{ piece.piece_id }}" {% if not piece.is_users_piece(session.get('user_id')) %}hidden{% endif %}>Remove from Library</button>
+        <button class="add_upiece" id="add-{{piece.piece_id}}" data-pieceId="{{ piece.piece_id }}" {% if piece.is_users_piece(session.get('user_id')) %}
+        hidden{% endif %}>Add to Library</button>
+    </span>
             </li>
             {% endfor %}
           </ul> 

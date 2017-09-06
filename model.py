@@ -235,7 +235,6 @@ class Piece(db.Model):
 
         return is_found
 
-
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
@@ -273,6 +272,7 @@ class SheetMusic(db.Model):
     score_type = db.Column(db.String(248))
     license_type = db.Column(db.String(40))
     num_lic_owned = db.Column(db.Integer)
+    duration = db.Column(db.Integer)
     # price_per = db.Column(db.??type?) ?????????Add this later, maybe?
 
     # Define a relationship w/Piece class via piece_id foreign key.
@@ -511,14 +511,14 @@ class Assignment(db.Model):
     assignment_id = db.Column(db.Integer,
                               primary_key=True,
                               autoincrement=True)
-    sheet_id = db.Column(db.Integer,
-                         db.ForeignKey('sheets.sheet_id'),
-                         nullable=False)
+    cs_id = db.Column(db.Integer,
+                      db.ForeignKey('concert_sheets.cs_id'),
+                      nullable=False)
     pi_id = db.Column(db.Integer,
                       db.ForeignKey('performer_instruments.pi_id'))
 
     # Define a relationship w/SheetMusic class via sheet_id foreign key.
-    sheet = db.relationship('SheetMusic', backref='assignments')
+    concert_sheet = db.relationship('ConcertSheet', backref='assignments')
 
     # Define a relationship w/PerformerInstument class via pi_id foreign key.
     performer_instrument = db.relationship('PerformerInstrument',
@@ -527,10 +527,10 @@ class Assignment(db.Model):
     # define repr function to print some useful info re:db objects.
     def __repr__(self):
         """Print more useful info."""
-        return ("<Assignment id=%d, sheet_id=%d, pi_id=%d>" %
+        return ("<Assignment id=%d, sheet=%s, perf=%s>" %
                 (self.assignment_id,
-                 self.sheet.sheet_id,
-                 self.performer_instrument.pi_id))
+                 self.concert_sheet.sheet.piece.title,
+                 self.performer_instrument.performer.fname))
 
 
 class EventAssignment(db.Model):

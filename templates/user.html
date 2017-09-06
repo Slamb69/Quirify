@@ -5,15 +5,60 @@
 </head>
 
 {% block content %}
+<div class="container-fluid">
   {% if "user_id" in session %}
     <br>
-    <div>
-      <h2>My Information at-a-glance</h2>
+       <div class="row">
+        <div class="col-xs-12 col-md-8 main">
+         <h1>My Library</h1> &nbsp; &nbsp;<a href="/"><button 
+        class="btn btn-success btn-group btn-group-sm">Seach for music</button></a>
+        <!-- add button / link to search for a piece -->
+       <br> <h3>Pieces</h3>
+       {% if user.user_pieces %}
+        <ul style="list-style-type:none">
+          {% for upiece in user.user_pieces %}
+            <li>
+              <a href="/pieces/{{ upiece.piece.piece_id }}">{{ upiece.piece.title }} <i class="smalltxt">({{upiece.piece.composer}})</i></a>
+            </li>
+          {% endfor %}
+        {% endif %}
+        </ul>
+          <h3>Sheet Music Scores</h3>  
+         <ul style="list-style-type:none">
+        
+          {% if user.user_sheets %}
+         
+          {% for usheet in user.user_sheets %}
+            <li>
+              <a href="/sheets/{{ usheet.sheet.sheet_id }}">{{ usheet.sheet.piece.title }} &nbsp;<i class="smalltxt">{{usheet.sheet.edition_notes}}</i></a>
+            </li>
+          {% endfor %}
+          </ul>
+        {% endif %}
 
-      <h3>Concerts <button class="createbtn">Create a Concert</button></h3>
+
+        <h3>Audio Files</h3>  
+      <ul style="list-style-type:none">
+                {% if user.user_files %}
+            {% for ufile in user.user_files %}
+            <li>
+              <a href="/files/{{ ufile.audiofile.file_id }}">{{ ufile.audiofile.sheet.piece.title }} ({{ufile.audiofile.file_type}})</a>
+            </li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+             </ul>
+      </div>
+
+       
+  <div class="col-xs-6 col-md-4 side">
+       <h1>My Projects</h1><br>
+
+     
+        <h2>Concerts </h2> &nbsp; &nbsp;<button class="btn btn-primary btn-group btn-group-xs">New</button><br>
       <!-- add popup/expanding hidden form/or new page link? to create a new concert -->
       {% if user.concerts %}
-      <ul style="list-style-type:none">
+      <br><ul style="list-style-type:none">
         {% for concert in user.concerts %}
           <li>
             <a href="/concerts/{{ concert.concert_id }}">
@@ -23,22 +68,10 @@
         {% endfor %}
         </ul>
       {% endif %}
-
-      <h3>Library <a href="/"><button class="searchbtn">Seach for music</button></a></h3>
-      <!-- add button / link to search for a piece -->
-      {% if user.user_pieces %}
-      <ul style="list-style-type:none">
-        {% for upiece in user.user_pieces %}
-          <li>
-            <a href="/pieces/{{ upiece.piece.piece_id }}">{{ upiece.piece.title }}</a>
-          </li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-
-      <h3>Performance Groups <button class="createbtn">Create a Group</button></h3>
+    </div><div class="col-xs-6 col-md-4 side"> 
+      <h2>Performance Groups</h2> &nbsp; &nbsp;<button class="btn btn-primary btn-group btn-group-xs">New</button>
         {% if groups %}
-        <ul style="list-style-type:none">
+        <br><ul style="list-style-type:none">
           {% for group in groups %}
             <li>
               <a href="/groups/{{ group.group_code }}">{{ group.name }}</a>
@@ -46,29 +79,34 @@
           {% endfor %}
           </ul>
         {% endif %}
-
-     <h3>Roster <button class="createbtn">Add a performer</button></h3>
-      {% if performers %}
+    </div>
+    
+    <div class="col-xs-6 col-md-4 side">
+     <h2>Roster</h2> &nbsp; &nbsp;<button class="btn btn-primary btn-group btn-group-xs">New</button><br>
+      <br>{% if performers %}
         <ul style="list-style-type:none">
           {% for performer in performers %}
             <li>
-              <a href="/performer/{{ performer.performer_id }}">{{ performer.fname }} {{ performer.lname }}</a> 
-              {% if performer.performer_instruments %}
-                &nbsp;&nbsp;<i>Parts: 
+              <a href="/performers/{{ performer.performer_id }}">{{ performer.fname }} {{ performer.lname }}</a> 
+              {% if performer.performer_instruments %} <i class="smalltxt">Parts: 
                 {% for inst in performer.performer_instruments %}
-                  {{ inst.instrument.name }}&nbsp;
+                  {{ inst.instrument.instrument_code }}
                 {% endfor %}</i>
               {% endif %}
             </li>
           {% endfor %}
           </ul>
         {% endif %}
+      </div>
+  </div>
 
-    </div>
-  {% else %}
-    <div>
+
+
+  <div> 
+    {% else %}
       <a href="/register">Log in or register to see your home page.</a>
-    </div>
-{% endif %}
+        {% endif %}
+  </div>
+</div>
 
 {% endblock %}

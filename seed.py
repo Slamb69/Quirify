@@ -239,7 +239,8 @@ def load_sheets():
     for i, row in enumerate(open("data/sheet.txt")):
         row = row.rstrip()
 
-        (pid, url, cpdl, ed, edn, vc, inst, lang, key, time, scr, lic) = row.split(", ")
+        (pid, url, cpdl, ed, edn, vc, inst,
+         lang, key, time, scr, lic, dur) = row.split(", ")
 
         sheet = SheetMusic(piece_id=pid,
                            music_url=url,
@@ -252,7 +253,8 @@ def load_sheets():
                            key=key,
                            time_signature=time,
                            score_type=scr,
-                           license_type=lic)
+                           license_type=lic,
+                           duration=dur)
 
         # Add to the session.
         db.session.add(sheet)
@@ -416,9 +418,9 @@ def load_assignments():
     for i, row in enumerate(open("data/assignment.txt")):
         row = row.rstrip()
 
-        sheet_id, pi_id = row.split(", ")
+        cs_id, pi_id = row.split(", ")
 
-        assignment = Assignment(sheet_id=sheet_id,
+        assignment = Assignment(cs_id=cs_id,
                                 pi_id=pi_id)
 
         # Add to the session.

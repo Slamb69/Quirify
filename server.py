@@ -13,7 +13,10 @@ from model import (User, Concert, Event, Instrument, Owner, Group, Performer,
                    connect_to_db, db)
 
 from helper_functions import (parse_search_results, parse_page_results,
-                              add_piece_to_library, del_piece_from_library)
+                              add_piece_to_library, del_piece_from_library,
+                              add_sheet_to_library, del_sheet_from_library,
+                              add_audiofile_to_library,
+                              del_audiofile_from_library)
 
 import requests
 # To get text from CPDL pages, need Beautiful Soup!!
@@ -43,6 +46,20 @@ def none_filter(value):
         return value
 
 app.jinja_env.filters['none_filter'] = none_filter
+
+
+# Added a jinja filter so that duration of ssong displays as mm:ss.
+@app.template_filter()
+def mins_secs(seconds):
+    mins = str(int(seconds/60))
+    if seconds % 60 > 9:
+        secs = str(int(seconds % 60))
+    else:
+        secs = "0" + str(int(seconds % 60))
+
+    return mins + ':' + secs
+
+app.jinja_env.filters['mins_secs'] = mins_secs
 
 
 ############# HOMEPAGE & NAVBAR ROUTES #################
@@ -130,7 +147,7 @@ def login_process():
 def logout():
     """Log out."""
 
-    if session["user_id"]:
+    if session.get("user_id"):
         del session["user_id"]
         flash("Logged Out.")
 
@@ -285,6 +302,44 @@ def group_page(group_code):
     return render_template("group_page.html", group=group, perfs=perfs)
 
 
+@app.route("/performers/<performer_id>", methods=['GET'])
+def performer_page(performer_id):
+    """Show logged in user info about a performer."""
+    print performer_id
+    performer = Performer.query.get(performer_id)
+    print performer
+
+    perfgrps = PerformerGroup.query.filter_by(performer_id=performer_id).all()
+
+    perfinsts = PerformerInstrument.query.filter_by(performer_id=performer_id).all()
+
+    return render_template("performer_page.html", performer=performer,
+                           perfgrps=perfgrps, perfinsts=perfinsts)
+
+
+# @app.route("/assignments", methods=['GET'])
+# def assignment_page(assignment_id=False, piece_id=False, concert_id=False,
+#                     performer_id=False, event_id=False, instrument_code=False):
+#     """Show logged in user info about assignments."""
+
+#     if assignment_id:
+#         assignment = Assignment.query.filter_by(assignment_id=assignment_id).all()
+
+#     return render_template("assignment_page.html", assignment=assignment,
+#                            evtassign=evtassign)
+
+
+@app.route("/instruments/<instrument_code>", methods=['GET'])
+def instrument_page(instrument_code):
+    """Show logged in user info about an instrument."""
+
+    instrument = Instrument.query.get(instrument_code)
+
+    perfinst = PerformerInstrument.query.filter_by(instrument_code=instrument_code).all()
+
+    return render_template("instrument_page.html", instrument=instrument, perfinst=perfinst)
+
+
 ##########  AJAX / JSON ROUTES = DBASE LIBRARY ACTIONS ######################
 @app.route("/add_upiece.json", methods=['POST'])
 def add_upiece():
@@ -311,7 +366,7 @@ def add_upiece():
 def del_upiece():
     """Deleting a piece from the user's library"""
 
-    print "\n\n\n GOT TO DEL UPIECE! \n\n\n"
+    # print "\n\n\n GOT TO DEL UPIECE! \n\n\n"
 
     piece_id = request.form.get("piece_id")
 
@@ -329,6 +384,97 @@ def del_upiece():
 
     return jsonify(result)
 
+
+@app.route("/add_usheet.json", methods=['POST'])
+def add_usheet():
+    """Adding a Sheet to the user's library"""
+
+    sheet_id = request.form.get("sheet_id")
+
+    sheet = SheetMusic.query.get(sheet_id)
+
+    user_id = session.get("user_id")
+
+    add_sheet_to_library(user_id, sheet_id)
+
+    print "{} edition of {} added to your library.".format(sheet.edition_notes,
+                                                           sheet.piece.title)
+
+    message = "{} edition of {} added to your library.".format(sheet.edition_notes,
+                                                               sheet.piece.title)
+
+    result = {"message": message, "in_db": True}
+
+    return jsonify(result)
+
+
+@app.route("/del_usheet.json", methods=['POST'])
+def del_usheet():
+    """Deleting a sheet from the user's library"""
+
+    # print "\n\n\n GOT TO DEL USHEET! \n\n\n"
+
+    sheet_id = request.form.get("sheet_id")
+
+    sheet = SheetMusic.query.get(sheet_id)
+
+    user_id = session.get("user_id")
+
+    del_sheet_from_library(user_id, sheet_id)
+
+    print ("{} edition of {} removed from your library."
+           .format(sheet.edition_notes, sheet.piece.title))
+
+    message = ("{} edition of {} removed from your library."
+               .format(sheet.edition_notes, sheet.piece.title))
+
+    result = {"message": message, "in_db": False}
+
+    return jsonify(result)
+
+
+@app.route("/add_uaudiofile.json", methods=['POST'])
+def add_uaudiofile():
+    """Adding a AudioFile to the user's library"""
+
+    file_id = request.form.get("file_id")
+
+    audiofile = AudioFile.query.get(file_id)
+
+    user_id = session.get("user_id")
+
+    add_audiofile_to_library(user_id, file_id)
+
+    print "{} file added to your library.".format(audiofile.file_type)
+
+    message = "{} file added to your library.".format(audiofile.file_type)
+
+    result = {"message": message, "in_db": True}
+
+    return jsonify(result)
+
+
+@app.route("/del_uaudiofile.json", methods=['POST'])
+def del_uaudiofile():
+    """Deleting an audio file from the user's library"""
+
+    # print "\n\n\n GOT TO DEL UFILE! \n\n\n"
+
+    file_id = request.form.get("file_id")
+
+    audiofile = AudioFile.query.get(file_id)
+
+    user_id = session.get("user_id")
+
+    del_audiofile_from_library(user_id, file_id)
+
+    print "{} file removed from your library.".format(audiofile.file_type)
+
+    message = "{} file removed from your library.".format(audiofile.file_type)
+
+    result = {"message": message, "in_db": False}
+
+    return jsonify(result)
 
 ############ DUNDER MAIN STUFF ##############################################
 if __name__ == "__main__":

@@ -5,20 +5,19 @@
 </head>
 
 {% block content %}
-<div> 
-  <h2>Sheet music PDF:<br/>
-    <a href="{{ sheet.music_url }}" target="_blank" rel="nofollow" download="{{ sheet.piece.title }}.pdf">
+<div class="content-fluid"> 
+<h2>Sheet music PDF:</h2>
+    <div ><h4><a href="{{ sheet.music_url }}" target="_blank" rel="nofollow" download="{{ sheet.piece.title }}.pdf">
       {{ sheet.piece.title }} 
         ({% if sheet.voicing %}{{ sheet.voicing }}{% else %}{{ sheet.piece.original_voicing|none_filter }}{% endif %}{% if sheet.key %}, 
           {{ sheet.key|none_filter }}
-        {% endif %})</a>
-            {% if sheet.is_users_sheet(session.get('user_id')) %}
-              <button id="del_usheet" name="usheetdel" class="db_delbtn">Remove from Library</button>
-            {% else %}
-              <button id="add_usheet" name="usheetadd" class="db_addbtn">Add to Library</button>
-      {% endif %}</h2>
+        {% endif %})</a>&nbsp;&nbsp;
+          <span class="btnToggle">
+            <button class="del_usheet" id="del-{{sheet.sheet_id}}" data-sheetId="{{ sheet.sheet_id }}" {% if not sheet.is_users_sheet(session.get('user_id')) %}hidden{% endif %}>Remove from Library</button>
+            <button class="add_usheet" id="add-{{sheet.sheet_id}}" data-sheetId="{{ sheet.sheet_id }}" {% if sheet.is_users_sheet(session.get('user_id')) %}hidden{% endif %}>Add to Library</button>
+          </span> </h4>
 
-  {% if sheet.edition_notes %}
+  <div>{% if sheet.edition_notes %}
     <h3>Edition notes: {{ sheet.edition_notes }}</h3>
   {% endif %}
       <ul style="list-style-type:none">
@@ -39,23 +38,109 @@
                     {{ provider.provider.name|none_filter }}{% endfor %}</li>
       </ul>
 </div>
+</div>
   {% if sheet.audiofiles %}
   <h3>Download Associated Files:</h3>
       {% for aud in sheet.audiofiles %}
       <ul style="list-style-type:none"> 
         <li><a href="{{ aud.url }}" download>.{{ aud.file_type }} File
-          {% if aud.voicing_details %} ({{ aud.voicing_details }})</a>&nbsp; 
-            
-            {% if sheet.is_users_sheet(session.get('user_id')) %}
-              <button id="del_usheet" name="usheetdel" class="db_delbtn">Remove from Library</button>
-            {% else %}
-              <button id="add_usheet" name="usheetadd" class="db_addbtn">Add to Library</button>
-            {% endif %}
-          {% endif %}
+          {% if aud.voicing_details %} ({{ aud.voicing_details }}){% endif %}</a>&nbsp; 
+            <span class="btnToggle">       
+              <button class="del_ufile" id="del-{{aud.file_id}}" data-fileId="{{ aud.file_id }}" {% if not aud.is_users_file(session.get('user_id')) %}hidden{% endif %}>Remove from Library</button>
+              <button class="add_ufile" id="add-{{aud.file_id}}" data-fileId="{{ aud.file_id }}" {% if aud.is_users_file(session.get('user_id')) %}hidden{% endif %}>Add to Library</button>
+            </span>
         </li>
       </ul>
       {% endfor %}
 </div>
   {% endif %}
 
+<script type="text/javascript">
+// "use strict";
+
+// // Success function when item added to or deleted from user's library.
+// function alertLibraryResult(result, pieceid) {
+//     var addSelectorString = "#add-"+pieceid;
+//     var delSelectorString = "#del-"+pieceid;
+//     var addButton = $(addSelectorString);
+//     var delButton = $(delSelectorString);
+//     if (addButton.prop("hidden")){
+//       addButton.prop("hidden", false);
+//     }else{
+//       addButton.prop("hidden", true);
+//     }
+
+//     if (delButton.prop("hidden")){
+//       delButton.prop("hidden", false);
+
+//     }else{
+//       delButton.prop("hidden", true);
+//     }
+
+//     alert(result.message);
+// }
+
+// // event listener & handler to delete Sheet from UserSheet library.
+// $(".del_usheet").on("click", function (evt) {
+//     var formInput = {"sheet_id": $(evt.currentTarget).data("sheetid")};
+
+//     console.log(evt.currentTarget);
+//     console.log(formInput);
+
+//     $.post("/del_usheet.json",
+//            formInput,
+//            function(evt) {
+//            alertLibraryResult(evt, formInput.sheet_id);
+//            });
+// });
+
+// // event listener & handler to add Sheet to UserSheet library.
+// $(".add_usheet").on("click", function (evt) {
+
+//     var formInput = {"sheet_id": $(evt.currentTarget).data("sheetid")};
+
+//     // console.log(evt.currentTarget);
+//     // console.log(formInput);
+
+//     $.post("/add_usheet.json",
+//            formInput,
+//            function(evt) {
+//            alertLibraryResult(evt, formInput.sheet_id);
+//            });
+// });
+
+// // event listener & handler to delete audiofile from UserAudioFile library.
+// $(".del_ufile").on("click", function (evt) {
+//     var formInput = {"file_id": $(evt.currentTarget).data("fileid")};
+
+//     console.log(evt.currentTarget);
+//     console.log(formInput);
+
+//     $.post("/del_uaudiofile.json",
+//            formInput,
+//            function(evt) {
+//            alertLibraryResult(evt, formInput.file_id);
+//            });
+// });
+
+// // event listener & handler to add file to UserAudioFile library.
+// $(".add_ufile").on("click", function (evt) {
+    
+//     console.log(evt.currentTarget);
+//     console.log(formInput);
+    
+//     var formInput = {"file_id": $(evt.currentTarget).data("fileid")};
+
+//     // console.log(evt.currentTarget);
+//     // console.log(formInput);
+
+//     $.post("/add_uaudiofile.json",
+//            formInput,
+//            function(evt) {
+//            alertLibraryResult(evt, formInput.file_id);
+//            });
+// });
+
+
+</script>
 {% endblock %}

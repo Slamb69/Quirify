@@ -5,9 +5,9 @@
 </head>
 
 {% block content %}
-<div> 
-    <h1>NEW Search results:</h1> 
-    <ul>
+<div class="container-fluid"> 
+    <h1>Search results:</h1> 
+    <ul style="list-style-type:none" class="list">
         {% for result in results %}
         <li>
             <a href="/page_search?page_id={{ result[0] }}">{{ result[1] }}</a>
